@@ -3,6 +3,7 @@ import java.io.*;
 public class SharedObject implements Serializable, SharedObject_itf {
 	
 	private int id;
+	private Object obj;
 	private enum lock {NL,
 					RLC,
 					WLC,
@@ -18,13 +19,18 @@ public class SharedObject implements Serializable, SharedObject_itf {
 	// 4 : WLT
 	// 5 : RLT_wLC
 
-	public SharedObject(int id){
+	public SharedObject(int id, Object objet){
 		this.id = id;
+		this.obj = objet;
 		this.lock_state = lock.NL;
 	}
 
 	public int getId() {
 		return id;
+	}
+
+	public Object getObj() {
+		return obj;
 	}
 
 	
@@ -39,7 +45,8 @@ public class SharedObject implements Serializable, SharedObject_itf {
 			case WLC :
 				this.lock_state = lock.RLT_WLC;
 				break;
-			
+			default :
+				;;			
 		}
 	}
 
@@ -74,12 +81,42 @@ public class SharedObject implements Serializable, SharedObject_itf {
 
 	// callback invoked remotely by the server
 	public synchronized Object reduce_lock() {
+		switch (this.lock_state){
+			case WLT :
+			case WLC :
+				this.lock_state = lock.RLC;
+				break;
+			case RLT_WLC :
+				this.lock_state = lock.RLT;
+				break;
+			default :
+				;;
+		}
+		return this;
 	}
 
 	// callback invoked remotely by the server
 	public synchronized void invalidate_reader() {
+		switch (this.lock_state){
+			case RLC :
+			case RLT :
+				this.lock_state = lock.NL;
+				break;
+			default :
+				;;
+		}
 	}
 
 	public synchronized Object invalidate_writer() {
+		switch (this.lock_state){
+			case WLT :
+			case WLC :
+			case RLT_WLC :
+				this.lock_state = lock.NL;
+				break;
+			default :
+				;;
+		}
+		return this;
 	}
 }
