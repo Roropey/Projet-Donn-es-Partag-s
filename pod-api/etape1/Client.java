@@ -6,16 +6,15 @@ import java.util.*;
 
 public class Client extends UnicastRemoteObject implements Client_itf {
 
-	private static HashMap<Integer,SharedObject> DictionnaireIntegerSharedObject;
-	private static HashMap<SharedObject,Integer> DictionnaireSharedObjectInteger;
-	private static int portServeurClient = 1234;
+	private static HashMap<Integer,SharedObject> DictionnaireIntegerSharedObject = new HashMap<>();
+	private static HashMap<SharedObject,Integer> DictionnaireSharedObjectInteger = new HashMap<>()
 	private static Client clientActuel;
+
 	public Client() throws RemoteException {
 		super();
-		DictionnaireIntegerSharedObject = new HashMap<>();		
-		DictionnaireSharedObjectInteger = new HashMap<>();
 	}
 
+	
 
 ///////////////////////////////////////////////////
 //         Interface to be used by applications
@@ -23,13 +22,7 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 
 	// initialization of the client layer
 	public static void init() {
-		try {			
-			Registry registry = LocateRegistry.createRegistry(portServeurClient);
-			clientActuel = new Client()
-			Naming.rebind("//localhost:"+Integer.toString(portServeurClient)+"/client",clientActuel);
-		} catch (Exception e){
-			e.printStackTrace();
-		}
+		;;
 	}
 	
 	// lookup in the name server
@@ -63,19 +56,15 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 
 	// request a read lock from the server
 	public static Object lock_read(int id) {
-		Server_itf serveur = (Server_itf) Naming.lookup("//localhost:"+Integer.toString(portServeurClient)+"/serveur")
+		Server_itf serveur = (Server_itf) Naming.lookup("//localhost:4000/serveur")
 		Object objet = serveur.lock_read(id,clientActuel);
-		SharedObject sharedObject = DictionnaireIntegerSharedObject.get(id);
-		sharedObject.lock_read();
 		return objet;
 	}
 
 	// request a write lock from the server
 	public static Object lock_write (int id) {
-		Server_itf serveur = (Server_itf) Naming.lookup("//localhost:"+Integer.toString(portServeurClient)+"/serveur")
-		Object objet = serveur.lock_write(id,clientActuel);
-		SharedObject sharedObject = DictionnaireIntegerSharedObject.get(id);
-		sharedObject.lock_write();
+		Server_itf serveur = (Server_itf) Naming.lookup("//localhost:4000/serveur")
+		Object objet = serveur.lock_write(id,clientActuel);		
 		return objet;
 	}
 
@@ -98,5 +87,6 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 	public Object invalidate_writer(int id) throws java.rmi.RemoteException {
 		SharedObject sharedObject = DictionnaireIntegerSharedObject.get(id);
 		sharedObject.invalidate_reader();
+		return sharedObject.getObj();
 	}
 }
