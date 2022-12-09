@@ -7,7 +7,7 @@ import java.util.*;
 public class Server extends UnicastRemoteObject implements Server_itf {
 
 	private static HashMap<Integer,ServerObject> DictionnaireServerObject = new HashMap<>();
-	private static HashMap<Integer,Client_itf> UtilisationServerObject = new HashMap<>();
+	private static HashMap<Integer,Client> UtilisationServerObject = new HashMap<>();
 	private HashMap<String,Integer> NamesIds;
 	private static Integer nbObj = 0;
 
@@ -24,7 +24,7 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 	// initialization of the server layer
 	public static void init() {
 		try {
-			Registry registry = LocateRegistry.createRegistry(portServeurClient);
+			Registry registry = LocateRegistry.createRegistry(4000);
 			Naming.rebind("//localhost:4000/serveur",new Server());
 		} catch (Exception e){
 			e.printStackTrace();
@@ -33,7 +33,7 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 	
 	// lookup in the name server
 	public int lookup(String name) {
-		return this.NamesIds.get(name)
+		return this.NamesIds.get(name);
 
 	}		
 	
@@ -48,7 +48,7 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 		nbObj +=1;
 		ServerObject serverObject = new ServerObject(nbObj, o);
 		DictionnaireServerObject.put(nbObj,serverObject);
-		
+		return nbObj;
 	}
 	
 /////////////////////////////////////////////////////////////
@@ -58,36 +58,37 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 	// request a read lock from the client
 	public Object lock_read(int id, Client_itf client) throws java.rmi.RemoteException{
 		ServerObject serverObject = DictionnaireServerObject.get(id);
-		
-		UtilisationServerObject.put(id,client);	
+		Client client_non_itf = (Client) client;
+		UtilisationServerObject.put(id,client_non_itf);	
 		serverObject.lock_read();
 		return serverObject.getObj();
 			
-		}
 	}
 
 	// request a write lock from the client
 	public Object lock_write (int id, Client_itf client) throws java.rmi.RemoteException{
 		
+		
 		ServerObject serverObject = DictionnaireServerObject.get(id);
-		UtilisationServerObject.put(id,client);			
+		Client client_non_itf = (Client) client;
+		UtilisationServerObject.put(id,client_non_itf);			
 		serverObject.lock_write();
 		return serverObject.getObj();
 		
 	}
 
 	public static void reduce_lock(int id) throws java.rmi.RemoteException{
-		Client_itf clientUtilisateur = UtilisationServerObject.get(id);
+		Client clientUtilisateur = UtilisationServerObject.get(id);
 		clientUtilisateur.reduce_lock(id);
 	}
 
 	public static void invalidate_reader(int id) throws java.rmi.RemoteException{
-		Client_itf clientUtilisateur = UtilisationServerObject.get(id);
+		Client clientUtilisateur = UtilisationServerObject.get(id);
 		clientUtilisateur.invalidate_reader(id);
 	}
 
 	public static void invalidate_writer(int id) throws java.rmi.RemoteException{
-		Client_itf clientUtilisateur = UtilisationServerObject.get(id);
+		Client clientUtilisateur = UtilisationServerObject.get(id);
 		clientUtilisateur.invalidate_writer(id);
 	}
 

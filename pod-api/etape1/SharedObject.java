@@ -3,7 +3,7 @@ import java.io.*;
 public class SharedObject implements Serializable, SharedObject_itf {
 	
 	private int id;
-	private Object obj;
+	public Object obj;
 	private enum lock {NL,
 					RLC,
 					WLC,

@@ -7,7 +7,7 @@ import java.util.*;
 public class Client extends UnicastRemoteObject implements Client_itf {
 
 	private static HashMap<Integer,SharedObject> DictionnaireIntegerSharedObject = new HashMap<>();
-	private static HashMap<SharedObject,Integer> DictionnaireSharedObjectInteger = new HashMap<>()
+	private static HashMap<SharedObject,Integer> DictionnaireSharedObjectInteger = new HashMap<>();
 	private static Client clientActuel;
 
 	public Client() throws RemoteException {
@@ -27,27 +27,42 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 	
 	// lookup in the name server
 	public static SharedObject lookup(String name) {
-		Server_itf serveur = (Server_itf) Naming.lookup("//localhost:"+Integer.toString(portServeurClient)+"/serveur")
-		int id = serveur.lookup(name);
-		return DictionnaireIntegerSharedObject.get(id);
+		try {
+			Server_itf serveur = (Server_itf) Naming.lookup("//localhost:4000/serveur");
+			int id = serveur.lookup(name);
+			return DictionnaireIntegerSharedObject.get(id);
+		} catch (Exception e){
+			e.printStackTrace();
+			return null;
+		}
+		
 	}		
 	
 	// binding in the name server
 	public static void register(String name, SharedObject_itf so) {
-		Server_itf serveur = (Server_itf) Naming.lookup("//localhost:"+Integer.toString(portServeurClient)+"/serveur")
-		int id = DictionnaireSharedObjectInteger.get(so);
-		serveur.register(name,id);
+		try {
+			Server_itf serveur = (Server_itf) Naming.lookup("//localhost:4000/serveur");
+			int id = DictionnaireSharedObjectInteger.get(so);
+			serveur.register(name,id);
+		} catch (Exception e){
+			e.printStackTrace();
+		}
 	}
 
 	// creation of a shared object
 	public static SharedObject create(Object o) {
-		Server_itf serveur = (Server_itf) Naming.lookup("//localhost:"+Integer.toString(portServeurClient)+"/serveur")
-		int id = serveur.create(o);
-		SharedObject sharedObject = new SharedObject(id, o);
-		DictionnaireSharedObjectInteger.put(sharedObject,id);		
-		DictionnaireIntegerSharedObject.put(id,sharedObject);
+		try {
+			Server_itf serveur = (Server_itf) Naming.lookup("//localhost:4000/serveur");
+			int id = serveur.create(o);
+			SharedObject sharedObject = new SharedObject(id, o);
+			DictionnaireSharedObjectInteger.put(sharedObject,id);		
+			DictionnaireIntegerSharedObject.put(id,sharedObject);
 
-		return sharedObject;
+			return sharedObject;
+		} catch (Exception e){
+			e.printStackTrace();
+			return null;
+		}
 	}
 	
 /////////////////////////////////////////////////////////////
@@ -56,16 +71,26 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 
 	// request a read lock from the server
 	public static Object lock_read(int id) {
-		Server_itf serveur = (Server_itf) Naming.lookup("//localhost:4000/serveur")
-		Object objet = serveur.lock_read(id,clientActuel);
-		return objet;
+		try {
+			Server_itf serveur = (Server_itf) Naming.lookup("//localhost:4000/serveur");
+			Object objet = serveur.lock_read(id,clientActuel);
+			return objet;
+		} catch (Exception e){
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	// request a write lock from the server
 	public static Object lock_write (int id) {
-		Server_itf serveur = (Server_itf) Naming.lookup("//localhost:4000/serveur")
-		Object objet = serveur.lock_write(id,clientActuel);		
-		return objet;
+		try {
+			Server_itf serveur = (Server_itf) Naming.lookup("//localhost:4000/serveur");
+			Object objet = serveur.lock_write(id,clientActuel);		
+			return objet;
+		} catch (Exception e){
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	// receive a lock reduction request from the server
