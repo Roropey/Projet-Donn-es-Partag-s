@@ -22,7 +22,7 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 
 	// initialization of the client layer
 	public static void init() {
-		;;
+		Server.init();
 	}
 	
 	// lookup in the name server
@@ -32,7 +32,7 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 			int id = serveur.lookup(name);
 			return DictionnaireIntegerSharedObject.get(id);
 		} catch (Exception e){
-			e.printStackTrace();
+			//e.printStackTrace();
 			return null;
 		}
 		
@@ -45,7 +45,7 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 			int id = DictionnaireSharedObjectInteger.get(so);
 			serveur.register(name,id);
 		} catch (Exception e){
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 
@@ -60,7 +60,7 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 
 			return sharedObject;
 		} catch (Exception e){
-			e.printStackTrace();
+			//e.printStackTrace();
 			return null;
 		}
 	}
@@ -76,7 +76,7 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 			Object objet = serveur.lock_read(id,clientActuel);
 			return objet;
 		} catch (Exception e){
-			e.printStackTrace();
+			//e.printStackTrace();
 			return null;
 		}
 	}
@@ -88,7 +88,7 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 			Object objet = serveur.lock_write(id,clientActuel);		
 			return objet;
 		} catch (Exception e){
-			e.printStackTrace();
+			//e.printStackTrace();
 			return null;
 		}
 	}
