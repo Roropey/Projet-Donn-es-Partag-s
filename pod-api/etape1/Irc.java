@@ -31,6 +31,7 @@ public class Irc extends Frame {
 		if (s == null) {
 			s = Client.create(new Sentence());
 			Client.register("IRC", s);
+			System.out.println("Création objet IRC");
 		}
 		// create the graphical part
 		new Irc(s);

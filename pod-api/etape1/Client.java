@@ -6,9 +6,10 @@ import java.util.*;
 
 public class Client extends UnicastRemoteObject implements Client_itf {
 
-	private static HashMap<Integer,SharedObject> DictionnaireIntegerSharedObject = new HashMap<>();
-	private static HashMap<SharedObject,Integer> DictionnaireSharedObjectInteger = new HashMap<>();
-	private static Client clientActuel;
+	private static HashMap<Integer,SharedObject> MapIntegerToSObject = new HashMap<>();
+	//private static HashMap<SharedObject,Integer> DictionnaireSharedObjectInteger = new HashMap<>();
+	//private static Server_itf serveur;
+	private static Client clientActuel = null;
 
 	public Client() throws RemoteException {
 		super();
@@ -22,7 +23,16 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 
 	// initialization of the client layer
 	public static void init() {
-		Server.init();
+		try {
+			//Server_itf serveur = (Server_itf) Naming.lookup("//localhost:4000/serveur");
+			if (clientActuel == null){
+				clientActuel = new Client();
+			}
+		} catch (Exception e){
+			;;
+		}
+		
+
 	}
 	
 	// lookup in the name server
@@ -30,21 +40,34 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 		try {
 			Server_itf serveur = (Server_itf) Naming.lookup("//localhost:4000/serveur");
 			int id = serveur.lookup(name);
-			return DictionnaireIntegerSharedObject.get(id);
+			System.out.println("Lookup id reçu "+Integer.toString(id));
+			return MapIntegerToSObject.get(id);
+			/*
+			System.out.println("Reussite lookup, id reçu "+Integer.toString(id));
+			if (MapIntegerToSObject.containsKey(id)) {
+				System.out.println("Id présent");
+			} else {
+				System.out.println("Id non présent");
+			}
+			return MapIntegerToSObject.get(id);*/
 		} catch (Exception e){
 			//e.printStackTrace();
+			System.out.println("Echec lookup");
 			return null;
 		}
 		
 	}		
 	
 	// binding in the name server
-	public static void register(String name, SharedObject_itf so) {
+	public static void register(String name, SharedObject_itf so_itf) {
 		try {
 			Server_itf serveur = (Server_itf) Naming.lookup("//localhost:4000/serveur");
-			int id = DictionnaireSharedObjectInteger.get(so);
-			serveur.register(name,id);
+			SharedObject so = (SharedObject) so_itf;
+			System.out.println ("Passage so");
+			serveur.register(name,so.getId());
+			System.out.println("Reussite register");
 		} catch (Exception e){
+			System.out.println("Echec register");
 			//e.printStackTrace();
 		}
 	}
@@ -54,9 +77,17 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 		try {
 			Server_itf serveur = (Server_itf) Naming.lookup("//localhost:4000/serveur");
 			int id = serveur.create(o);
+			System.out.println("Client id reçu "+Integer.toString(id));
 			SharedObject sharedObject = new SharedObject(id, o);
+			/*
 			DictionnaireSharedObjectInteger.put(sharedObject,id);		
-			DictionnaireIntegerSharedObject.put(id,sharedObject);
+			MapIntegerToSObject.put(id,sharedObject);*/
+			MapIntegerToSObject.put(id,sharedObject);
+			if (MapIntegerToSObject.containsKey(id)) {
+				System.out.println("Ajout id dans l'association id -> objet");
+			} else {
+				System.out.println("Id non présent");
+			}
 
 			return sharedObject;
 		} catch (Exception e){
@@ -95,7 +126,7 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 
 	// receive a lock reduction request from the server
 	public Object reduce_lock(int id) throws java.rmi.RemoteException {
-		SharedObject sharedObject = DictionnaireIntegerSharedObject.get(id);
+		SharedObject sharedObject = MapIntegerToSObject.get(id);
 		sharedObject.reduce_lock();
 		return sharedObject.getObj();
 	}
@@ -103,14 +134,14 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 
 	// receive a reader invalidation request from the server
 	public void invalidate_reader(int id) throws java.rmi.RemoteException {
-		SharedObject sharedObject = DictionnaireIntegerSharedObject.get(id);
+		SharedObject sharedObject = MapIntegerToSObject.get(id);
 		sharedObject.invalidate_reader();
 	}
 
 
 	// receive a writer invalidation request from the server
 	public Object invalidate_writer(int id) throws java.rmi.RemoteException {
-		SharedObject sharedObject = DictionnaireIntegerSharedObject.get(id);
+		SharedObject sharedObject = MapIntegerToSObject.get(id);
 		sharedObject.invalidate_reader();
 		return sharedObject.getObj();
 	}
