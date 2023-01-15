@@ -16,6 +16,7 @@ public class ServerObject implements Serializable, ServerObject_itf {
 		this.id = id;
 		this.obj = objet;
 		this.lock_state = lock.NL;
+		this.clientUtilisateur = new ArrayList<Client_itf>();
 	}
 
 	public int getId() {
@@ -29,7 +30,7 @@ public class ServerObject implements Serializable, ServerObject_itf {
 	
 
 	// invoked by the user program on the client node
-	public void lock_read(Client_itf client) throws java.rmi.RemoteException{
+	public Object lock_read(Client_itf client) throws java.rmi.RemoteException{
 		switch (this.lock_state){
 			case WL :
 				Client_itf ancienUtilisateur = clientUtilisateur.remove(0);
@@ -39,10 +40,11 @@ public class ServerObject implements Serializable, ServerObject_itf {
 			case RL :
 				clientUtilisateur.add(client);
 		}
+		return obj;
 	}
 
 	// invoked by the user program on the client node
-	public void lock_write(Client_itf client) throws java.rmi.RemoteException{
+	public Object lock_write(Client_itf client) throws java.rmi.RemoteException{
 		switch (this.lock_state){
 			case RL :
 				while (!clientUtilisateur.isEmpty()) {
@@ -58,5 +60,6 @@ public class ServerObject implements Serializable, ServerObject_itf {
 				Server.invalidate_writer(id,ancienUtilisateur);
 				clientUtilisateur.add(client);
 		}
+		return obj;
 	}
 }
