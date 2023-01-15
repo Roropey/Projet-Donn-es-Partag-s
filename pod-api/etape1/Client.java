@@ -27,6 +27,7 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 			//Server_itf serveur = (Server_itf) Naming.lookup("//localhost:4000/serveur");
 			if (clientActuel == null){
 				clientActuel = new Client();
+				System.out.println("Création client");
 			}
 		} catch (Exception e){
 			;;
@@ -41,7 +42,13 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 			Server_itf serveur = (Server_itf) Naming.lookup("//localhost:4000/serveur");
 			int id = serveur.lookup(name);
 			System.out.println("Lookup id reçu "+Integer.toString(id));
-			return MapIntegerToSObject.get(id);
+			if( MapIntegerToSObject.get(id) == null){
+				SharedObject sharedObject = new SharedObject(id, null);
+				MapIntegerToSObject.put(id,sharedObject);
+				return sharedObject;
+			} else{
+				return MapIntegerToSObject.get(id);
+			} 
 			/*
 			System.out.println("Reussite lookup, id reçu "+Integer.toString(id));
 			if (MapIntegerToSObject.containsKey(id)) {
@@ -103,8 +110,11 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 	// request a read lock from the server
 	public static Object lock_read(int id) {
 		try {
+			System.out.println("Client lock_read sur "+Integer.toString(id));
 			Server_itf serveur = (Server_itf) Naming.lookup("//localhost:4000/serveur");
 			Object objet = serveur.lock_read(id,clientActuel);
+			
+			System.out.println("Retour client lock_read : "+objet.getClass().getName());
 			return objet;
 		} catch (Exception e){
 			//e.printStackTrace();
@@ -115,8 +125,11 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 	// request a write lock from the server
 	public static Object lock_write (int id) {
 		try {
+			System.out.println("Client lock_write sur "+Integer.toString(id));
 			Server_itf serveur = (Server_itf) Naming.lookup("//localhost:4000/serveur");
 			Object objet = serveur.lock_write(id,clientActuel);		
+			
+			System.out.println("Retour client lock_write : "+objet.getClass().getName());
 			return objet;
 		} catch (Exception e){
 			//e.printStackTrace();

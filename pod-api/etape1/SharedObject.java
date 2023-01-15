@@ -37,13 +37,19 @@ public class SharedObject implements Serializable, SharedObject_itf {
 
 	// invoked by the user program on the client node
 	public void lock_read() {
+		if (this.obj != null){
+		System.out.println("lock_read sur "+this.obj.getClass().getName());
+		}else {
+			System.out.println("lock_read sur null");
+		}
 		switch (this.lock_state){
 			case NL :
-				Client.lock_read(id);
+				this.obj = Client.lock_read(id);
 			case RLC :
 				this.lock_state = lock.RLT;
 				break;
-			case WLC :
+			case WLC :			
+				this.obj = Client.lock_read(id);
 				this.lock_state = lock.RLT_WLC;
 				break;
 			default :
@@ -53,10 +59,15 @@ public class SharedObject implements Serializable, SharedObject_itf {
 
 	// invoked by the user program on the client node
 	public void lock_write() {
+		if (this.obj != null){
+		System.out.println("lock_write sur "+this.obj.getClass().getName());
+		} else {
+			System.out.println("lock_write sur null");
+		}
 		switch (this.lock_state){
 			case NL : 				
 			case RLC :
-				Client.lock_write(id);	
+				this.obj = Client.lock_write(id);
 			case WLC :
 				this.lock_state = lock.WLT;
 				break;

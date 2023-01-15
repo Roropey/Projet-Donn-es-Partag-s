@@ -66,11 +66,15 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 
 	// request a read lock from the client
 	public Object lock_read(int id, Client_itf client) throws java.rmi.RemoteException{
+		System.out.println("Server lock_read sur "+Integer.toString(id));
 		ServerObject serverObject = DictionnaireServerObject.get(id);
+		System.out.println("Server lock_read sur objet "+serverObject.getObj().getClass().getName());
 		//Client client_non_itf = (Client) client;
-		//UtilisationServerObject.put(id,client_non_itf);	
-		serverObject.lock_read(client);
-		return serverObject.getObj();
+		//UtilisationServerObject.put(id,client_non_itf);
+		Object objet = 	serverObject.lock_read(client);
+		System.out.println("Retour server lock_read : "+objet.getClass().getName());
+		return objet ;
+		//return serverObject.getObj();
 			
 	}
 
@@ -78,11 +82,16 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 	public Object lock_write (int id, Client_itf client) throws java.rmi.RemoteException{
 		
 		
+		System.out.println("Server lock_write sur "+Integer.toString(id));
 		ServerObject serverObject = DictionnaireServerObject.get(id);
+		
+		System.out.println("Server lock_write sur objet "+serverObject.getObj().getClass().getName());
 		//Client client_non_itf = (Client) client;
-		//UtilisationServerObject.put(id,client_non_itf);			
-		serverObject.lock_write(client);
-		return serverObject.getObj();
+		//UtilisationServerObject.put(id,client_non_itf);	
+		Object objet = 	serverObject.lock_write(client);
+		System.out.println("Retour server lock_write : "+objet.getClass().getName());
+		return objet ;		
+		//return serverObject.getObj();
 		
 	}
 
