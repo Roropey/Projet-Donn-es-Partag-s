@@ -20,11 +20,11 @@ public class ServerObject implements Serializable, ServerObject_itf {
 	}
 
 	public int getId() {
-		return id;
+		return this.id;
 	}
 
 	public Object getObj() {
-		return obj;
+		return this.obj;
 	}
 
 	
@@ -40,7 +40,7 @@ public class ServerObject implements Serializable, ServerObject_itf {
 			case RL :
 				clientUtilisateur.add(client);
 		}
-		return obj;
+		return this.obj;
 	}
 
 	// invoked by the user program on the client node
@@ -60,6 +60,6 @@ public class ServerObject implements Serializable, ServerObject_itf {
 				Server.invalidate_writer(id,ancienUtilisateur);
 				clientUtilisateur.add(client);
 		}
-		return obj;
+		return this.obj;
 	}
 }

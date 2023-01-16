@@ -3,18 +3,24 @@ import java.rmi.server.UnicastRemoteObject;
 import java.rmi.registry.*;
 import java.net.*;
 import java.util.*;
+import java.util.concurrent.locks.*;
 
 public class Server extends UnicastRemoteObject implements Server_itf {
 
-	private static HashMap<Object,Integer> MapObjectToId = new HashMap<>();
-	private static HashMap<Integer,ServerObject> DictionnaireServerObject = new HashMap<>();
-	private static HashMap<Integer,Client_itf> UtilisationServerObject = new HashMap<>();
+	private Lock moniteurLookupCreator;
+	private static HashMap<Integer, Lock> moniteursServerObject;
+	//private static HashMap<Object,Integer> MapObjectToId = new HashMap<>();
+	private static HashMap<Integer,ServerObject> DictionnaireServerObject;
+	//private static HashMap<Integer,Client_itf> UtilisationServerObject = new HashMap<>();
 	private HashMap<String,Integer> NamesIds;
 	private static Integer nbObj = 0;
 
 	public Server() throws RemoteException {
 		super();
 		this.NamesIds = new HashMap<>();
+		DictionnaireServerObject = new HashMap<>();
+		moniteursServerObject = new HashMap<>();
+		moniteurLookupCreator = new ReentrantLock();
 	}
 
 
@@ -34,30 +40,38 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 	
 	// lookup in the name server
 	public int lookup(String name) {
+		moniteurLookupCreator.lock();
 		System.out.println("Lookup serveur "+name);
-		int id = this.NamesIds.get(name);
-		System.out.println("Serveur renvoie "+Integer.toString(id));
-		return id;
+		
+		if (this.NamesIds.get(name)!=null){
+			
+			System.out.println("Unlock moniteur serveur");
+			moniteurLookupCreator.unlock();
+		}
+		//System.out.println("Serveur renvoie "+Integer.toString(id));
+		return this.NamesIds.get(name);
 
 	}		
 	
 	// binding in the name server
 	public void register(String name, int id) {
 		this.NamesIds.put(name,id);
+		moniteurLookupCreator.unlock();
 
 	}
 
 	// creation of a shared object
 	public int create(Object o) {
 		
-		if (MapObjectToId.get(o) == null) {
-			nbObj +=1;
-			ServerObject serverObject = new ServerObject(nbObj, o);
-			MapObjectToId.put(o,nbObj);
-			DictionnaireServerObject.put(nbObj,serverObject);
-		}
 		
-		return MapObjectToId.get(o);
+		nbObj +=1;
+		ServerObject serverObject = new ServerObject(nbObj, o);
+		DictionnaireServerObject.put(nbObj,serverObject);
+		
+		Lock moniteur = new ReentrantLock();
+		moniteursServerObject.put(nbObj,moniteur);
+		
+		return nbObj;
 	}
 	
 /////////////////////////////////////////////////////////////
@@ -66,13 +80,18 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 
 	// request a read lock from the client
 	public Object lock_read(int id, Client_itf client) throws java.rmi.RemoteException{
-		System.out.println("Server lock_read sur "+Integer.toString(id));
+
+		Lock moniteur = moniteursServerObject.get(id);
+		System.out.println("Server preLock lock_read sur "+Integer.toString(id));
+		moniteur.lock();
+		System.out.println("Server postLock lock_read sur "+Integer.toString(id));
 		ServerObject serverObject = DictionnaireServerObject.get(id);
 		System.out.println("Server lock_read sur objet "+serverObject.getObj().getClass().getName());
 		//Client client_non_itf = (Client) client;
 		//UtilisationServerObject.put(id,client_non_itf);
 		Object objet = 	serverObject.lock_read(client);
 		System.out.println("Retour server lock_read : "+objet.getClass().getName());
+		moniteur.unlock();
 		return objet ;
 		//return serverObject.getObj();
 			
@@ -80,9 +99,12 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 
 	// request a write lock from the client
 	public Object lock_write (int id, Client_itf client) throws java.rmi.RemoteException{
+
+		Lock moniteur = moniteursServerObject.get(id);
+		System.out.println("Server preLock lock_write sur "+Integer.toString(id));
+		moniteur.lock();
 		
-		
-		System.out.println("Server lock_write sur "+Integer.toString(id));
+		System.out.println("Server postLock lock_write sur "+Integer.toString(id));
 		ServerObject serverObject = DictionnaireServerObject.get(id);
 		
 		System.out.println("Server lock_write sur objet "+serverObject.getObj().getClass().getName());
@@ -90,6 +112,7 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 		//UtilisationServerObject.put(id,client_non_itf);	
 		Object objet = 	serverObject.lock_write(client);
 		System.out.println("Retour server lock_write : "+objet.getClass().getName());
+		moniteur.unlock();
 		return objet ;		
 		//return serverObject.getObj();
 		
