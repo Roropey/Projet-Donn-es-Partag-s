@@ -12,17 +12,13 @@ public class SharedObject implements Serializable, SharedObject_itf {
 					RLT_WLC,
 	}
 	private lock lock_state;
-	// 0 : NL
-	// 1 : RLC
-	// 2 : WLC
-	// 3 : RLT
-	// 4 : WLT
-	// 5 : RLT_wLC
+	private Boolean waiting;
 
 	public SharedObject(int id, Object objet){
 		this.id = id;
 		this.obj = objet;
 		this.lock_state = lock.NL;
+		this.waiting = false;
 	}
 
 	public int getId() {
@@ -37,44 +33,69 @@ public class SharedObject implements Serializable, SharedObject_itf {
 
 	// invoked by the user program on the client node
 	public void lock_read() {
+		/*
 		if (this.obj != null){
 		System.out.println("lock_read sur "+this.obj.getClass().getName());
 		}else {
 			System.out.println("lock_read sur null");
+		}*/
+		Boolean lockRead = false;
+		synchronized (this) {
+			// tant que l ’ attribut " attente " est vrai , on attend
+			while (this.waiting){
+				try {
+					wait();
+				} catch ( InterruptedException e ) {
+					e.printStackTrace ();
+				}
+			}
+			switch (this.lock_state){
+				case NL :
+					lockRead = true;
+				case RLC :
+					this.lock_state = lock.RLT;
+					break;
+				case WLC :			
+					this.lock_state = lock.RLT_WLC;
+					break;
+				default :
+					;;			
+			}
 		}
-		switch (this.lock_state){
-			case NL :
-				this.obj = Client.lock_read(id);
-			case RLC :
-				this.lock_state = lock.RLT;
-				break;
-			case WLC :			
-				this.obj = Client.lock_read(id);
-				this.lock_state = lock.RLT_WLC;
-				break;
-			default :
-				;;			
+		if (lockRead){
+			this.obj = Client.lock_read(id);
 		}
+		
 	}
 
 	// invoked by the user program on the client node
 	public void lock_write() {
-		if (this.obj != null){
-		System.out.println("lock_write sur "+this.obj.getClass().getName());
-		} else {
-			System.out.println("lock_write sur null");
+		Boolean lockWrite = false;
+		synchronized (this) {
+			// tant que l ’ attribut " attente " est vrai , on attend
+			while (this.waiting){
+				try {
+					wait();
+				} catch(InterruptedException e ) {
+					e.printStackTrace ();
+				}
+			}
+			switch (this.lock_state){
+				case NL : 				
+				case RLC :
+					lockWrite = true;					
+				case WLC :
+					this.lock_state = lock.WLT;
+					break;
+				default:
+					;;
+			}
 		}
-		switch (this.lock_state){
-			case NL : 				
-			case RLC :
-				this.obj = Client.lock_write(id);
-			case WLC :
-				this.lock_state = lock.WLT;
-				break;
-			default:
-				;;
+		if (lockWrite){
+			this.obj = Client.lock_write(id);
 		}
 	}
+
 
 	// invoked by the user program on the client node
 	public synchronized void unlock() {
@@ -89,13 +110,26 @@ public class SharedObject implements Serializable, SharedObject_itf {
 			default:
 				;;
 		}
+		try {
+			notify();
+		} catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 
 
 	// callback invoked remotely by the server
 	public synchronized Object reduce_lock() {
+		this.waiting = true;
 		switch (this.lock_state){
 			case WLT :
+				while (this.lock_state==lock.WLT) {
+					try {
+						wait();
+					} catch (InterruptedException e ) {
+						e.printStackTrace();
+					}
+				}
 			case WLC :
 				this.lock_state = lock.RLC;
 				break;
@@ -105,31 +139,73 @@ public class SharedObject implements Serializable, SharedObject_itf {
 			default :
 				;;
 		}
-		return this;
+		this.waiting = false;
+		try {
+			notify();
+		} catch(Exception e){
+			e.printStackTrace();
+		}
+		return this.obj;
 	}
 
 	// callback invoked remotely by the server
 	public synchronized void invalidate_reader() {
+		this.waiting = true;
 		switch (this.lock_state){
-			case RLC :
 			case RLT :
+				while (this.lock_state==lock.RLT) {
+					try {
+						wait();
+					} catch (InterruptedException e ) {
+						e.printStackTrace();
+					}
+				}
+			case RLC :			
 				this.lock_state = lock.NL;
 				break;
 			default :
 				;;
+		}
+		this.waiting = false;
+		try {
+			notify();
+		} catch(Exception e){
+			e.printStackTrace();
 		}
 	}
 
 	public synchronized Object invalidate_writer() {
+		
+		this.waiting = true;
 		switch (this.lock_state){
 			case WLT :
-			case WLC :
+				while (this.lock_state==lock.WLT) {
+					try {
+						wait();
+					} catch (InterruptedException e ) {
+						e.printStackTrace();
+					}
+				}
 			case RLT_WLC :
+				while (this.lock_state==lock.RLT_WLC) {
+					try {
+						wait();
+					} catch (InterruptedException e ) {
+						e.printStackTrace();
+					}
+				}
+			case WLC :			
 				this.lock_state = lock.NL;
 				break;
 			default :
 				;;
 		}
-		return this;
+		this.waiting = false;
+		try {
+			notify();
+		} catch(Exception e){
+			e.printStackTrace();
+		}
+		return this.obj;
 	}
 }

@@ -6,10 +6,8 @@ public class Sentence implements java.io.Serializable {
 	
 	public void write(String text) {
 		data = text;
-		System.out.println("Sentence write "+data);
 	}
 	public String read() {
-		System.out.println("Sentence read "+data);
 		return data;	
 	}
 	

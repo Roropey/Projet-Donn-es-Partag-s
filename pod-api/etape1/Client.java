@@ -6,9 +6,8 @@ import java.util.*;
 
 public class Client extends UnicastRemoteObject implements Client_itf {
 
-	private static HashMap<Integer,SharedObject> MapIntegerToSObject = new HashMap<>();
-	//private static HashMap<SharedObject,Integer> DictionnaireSharedObjectInteger = new HashMap<>();
-	//private static Server_itf serveur;
+	private static HashMap<Integer,SharedObject> MapIntegerToSObject;
+	private static Server_itf serveur;
 	private static Client clientActuel = null;
 
 	public Client() throws RemoteException {
@@ -23,84 +22,77 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 
 	// initialization of the client layer
 	public static void init() {
-		try {
-			//Server_itf serveur = (Server_itf) Naming.lookup("//localhost:4000/serveur");
-			if (clientActuel == null){
+		
+		if (clientActuel == null){
+			try{
 				clientActuel = new Client();
-				System.out.println("Création client");
+			} catch (RemoteException e){
+				e.printStackTrace();
 			}
-		} catch (Exception e){
-			;;
+
+			try {
+				serveur = (Server_itf) Naming.lookup("//localhost:4000/serveur");
+				MapIntegerToSObject = new HashMap<Integer,SharedObject>();
+			} catch (Exception e){
+				System.out.println("Echec connection serveur");
+				e.printStackTrace();
+			}
 		}
+		
 		
 
 	}
 	
 	// lookup in the name server
 	public static SharedObject lookup(String name) {
+		SharedObject sharedObject = null;
 		try {
-			Server_itf serveur = (Server_itf) Naming.lookup("//localhost:4000/serveur");
+			System.out.println("Tentative lookup");
 			int id = serveur.lookup(name);
-			System.out.println("Lookup id reçu "+Integer.toString(id));
-			if( MapIntegerToSObject.get(id) == null){
-				SharedObject sharedObject = new SharedObject(id, null);
-				MapIntegerToSObject.put(id,sharedObject);
-				return sharedObject;
-			} else{
-				return MapIntegerToSObject.get(id);
-			} 
-			/*
-			System.out.println("Reussite lookup, id reçu "+Integer.toString(id));
-			if (MapIntegerToSObject.containsKey(id)) {
-				System.out.println("Id présent");
-			} else {
-				System.out.println("Id non présent");
+			
+			System.out.println("Id return"+Integer.toString(id));
+
+			if (id>=0) {
+				if (MapIntegerToSObject.get(id) == null){
+					//Object objet = lock_read(id);
+					SharedObject sharedObjectVide = new SharedObject(id, null);
+					MapIntegerToSObject.put(id,sharedObjectVide);
+				}
+				sharedObject = MapIntegerToSObject.get(id);
 			}
-			return MapIntegerToSObject.get(id);*/
 		} catch (Exception e){
-			//e.printStackTrace();
-			System.out.println("Echec lookup");
-			return null;
+
+			System.out.println("Echec Lookup");
+			e.printStackTrace();
+			
 		}
+		return sharedObject;
 		
 	}		
 	
 	// binding in the name server
 	public static void register(String name, SharedObject_itf so_itf) {
 		try {
-			Server_itf serveur = (Server_itf) Naming.lookup("//localhost:4000/serveur");
 			SharedObject so = (SharedObject) so_itf;
-			System.out.println ("Passage so");
 			serveur.register(name,so.getId());
-			System.out.println("Reussite register");
 		} catch (Exception e){
-			System.out.println("Echec register");
-			//e.printStackTrace();
 		}
 	}
 
 	// creation of a shared object
 	public static SharedObject create(Object o) {
+		SharedObject sharedObject = null;
 		try {
-			Server_itf serveur = (Server_itf) Naming.lookup("//localhost:4000/serveur");
 			int id = serveur.create(o);
-			System.out.println("Client id reçu "+Integer.toString(id));
-			SharedObject sharedObject = new SharedObject(id, o);
-			/*
-			DictionnaireSharedObjectInteger.put(sharedObject,id);		
-			MapIntegerToSObject.put(id,sharedObject);*/
+			sharedObject = new SharedObject(id, o);
+			
 			MapIntegerToSObject.put(id,sharedObject);
-			if (MapIntegerToSObject.containsKey(id)) {
-				System.out.println("Ajout id dans l'association id -> objet");
-			} else {
-				System.out.println("Id non présent");
-			}
 
-			return sharedObject;
-		} catch (Exception e){
-			//e.printStackTrace();
-			return null;
+			
+		} catch (RemoteException e){
+			e.printStackTrace();
 		}
+		return sharedObject;
 	}
 	
 /////////////////////////////////////////////////////////////
@@ -109,32 +101,25 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 
 	// request a read lock from the server
 	public static Object lock_read(int id) {
+		Object objet = null;
 		try {
-			System.out.println("Client lock_read sur "+Integer.toString(id));
-			Server_itf serveur = (Server_itf) Naming.lookup("//localhost:4000/serveur");
-			Object objet = serveur.lock_read(id,clientActuel);
-			
-			System.out.println("Retour client lock_read : "+objet.getClass().getName());
-			return objet;
+			objet = serveur.lock_read(id,clientActuel);			
 		} catch (Exception e){
-			//e.printStackTrace();
-			return null;
+			
+			e.printStackTrace();
 		}
+		return objet;
 	}
 
 	// request a write lock from the server
-	public static Object lock_write (int id) {
+	public static Object lock_write (int id) {		
+		Object objet = null;
 		try {
-			System.out.println("Client lock_write sur "+Integer.toString(id));
-			Server_itf serveur = (Server_itf) Naming.lookup("//localhost:4000/serveur");
-			Object objet = serveur.lock_write(id,clientActuel);		
-			
-			System.out.println("Retour client lock_write : "+objet.getClass().getName());
-			return objet;
+			objet = serveur.lock_write(id,clientActuel);					
 		} catch (Exception e){
-			//e.printStackTrace();
-			return null;
+			e.printStackTrace();
 		}
+		return objet;
 	}
 
 	// receive a lock reduction request from the server

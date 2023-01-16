@@ -10,15 +10,15 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 	private Lock moniteurLookupCreator;
 	private static HashMap<Integer, Lock> moniteursServerObject;
 	//private static HashMap<Object,Integer> MapObjectToId = new HashMap<>();
-	private static HashMap<Integer,ServerObject> DictionnaireServerObject;
+	private static HashMap<Integer,ServerObject> MapIntegerToServerObject;
 	//private static HashMap<Integer,Client_itf> UtilisationServerObject = new HashMap<>();
-	private HashMap<String,Integer> NamesIds;
+	private HashMap<String,Integer> MapStringToInteger;
 	private static Integer nbObj = 0;
 
 	public Server() throws RemoteException {
 		super();
-		this.NamesIds = new HashMap<>();
-		DictionnaireServerObject = new HashMap<>();
+		this.MapStringToInteger = new HashMap<>();
+		MapIntegerToServerObject = new HashMap<>();
 		moniteursServerObject = new HashMap<>();
 		moniteurLookupCreator = new ReentrantLock();
 	}
@@ -31,7 +31,7 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 	// initialization of the server layer
 	public static void init() {
 		try {
-			Registry registry = LocateRegistry.createRegistry(4000);
+			LocateRegistry.createRegistry(4000);
 			Naming.rebind("//localhost:4000/serveur",new Server());
 		} catch (Exception e){
 			e.printStackTrace();
@@ -40,22 +40,23 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 	
 	// lookup in the name server
 	public int lookup(String name) {
+		System.out.println("Connection lookup");
 		moniteurLookupCreator.lock();
-		System.out.println("Lookup serveur "+name);
 		
-		if (this.NamesIds.get(name)!=null){
+		if (this.MapStringToInteger.get(name)!=null){
 			
 			System.out.println("Unlock moniteur serveur");
 			moniteurLookupCreator.unlock();
+			return this.MapStringToInteger.get(name);
+		} else {
+			return -1 ;
 		}
-		//System.out.println("Serveur renvoie "+Integer.toString(id));
-		return this.NamesIds.get(name);
 
 	}		
 	
 	// binding in the name server
 	public void register(String name, int id) {
-		this.NamesIds.put(name,id);
+		this.MapStringToInteger.put(name,id);
 		moniteurLookupCreator.unlock();
 
 	}
@@ -66,7 +67,7 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 		
 		nbObj +=1;
 		ServerObject serverObject = new ServerObject(nbObj, o);
-		DictionnaireServerObject.put(nbObj,serverObject);
+		MapIntegerToServerObject.put(nbObj,serverObject);
 		
 		Lock moniteur = new ReentrantLock();
 		moniteursServerObject.put(nbObj,moniteur);
@@ -85,7 +86,7 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 		System.out.println("Server preLock lock_read sur "+Integer.toString(id));
 		moniteur.lock();
 		System.out.println("Server postLock lock_read sur "+Integer.toString(id));
-		ServerObject serverObject = DictionnaireServerObject.get(id);
+		ServerObject serverObject = MapIntegerToServerObject.get(id);
 		System.out.println("Server lock_read sur objet "+serverObject.getObj().getClass().getName());
 		//Client client_non_itf = (Client) client;
 		//UtilisationServerObject.put(id,client_non_itf);
@@ -105,7 +106,7 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 		moniteur.lock();
 		
 		System.out.println("Server postLock lock_write sur "+Integer.toString(id));
-		ServerObject serverObject = DictionnaireServerObject.get(id);
+		ServerObject serverObject = MapIntegerToServerObject.get(id);
 		
 		System.out.println("Server lock_write sur objet "+serverObject.getObj().getClass().getName());
 		//Client client_non_itf = (Client) client;
@@ -118,9 +119,9 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 		
 	}
 
-	public static void reduce_lock(int id, Client_itf client) throws java.rmi.RemoteException{
+	public static Object reduce_lock(int id, Client_itf client) throws java.rmi.RemoteException{
 		//Client clientUtilisateur = UtilisationServerObject.get(id);
-		client.reduce_lock(id);
+		return client.reduce_lock(id);
 	}
 
 	public static void invalidate_reader(int id, Client_itf client) throws java.rmi.RemoteException{
@@ -128,9 +129,9 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 		client.invalidate_reader(id);
 	}
 
-	public static void invalidate_writer(int id, Client_itf client) throws java.rmi.RemoteException{
+	public static Object invalidate_writer(int id, Client_itf client) throws java.rmi.RemoteException{
 		//Client clientUtilisateur = UtilisationServerObject.get(id);
-		client.invalidate_writer(id);
+		return client.invalidate_writer(id);
 	}
 
 	public static void main(String args[]) {

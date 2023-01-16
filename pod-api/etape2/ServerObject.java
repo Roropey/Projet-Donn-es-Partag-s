@@ -1,4 +1,5 @@
 import java.io.*;
+import java.rmi.RemoteException;
 import java.util.*;
 
 public class ServerObject implements Serializable, ServerObject_itf {
@@ -9,57 +10,70 @@ public class ServerObject implements Serializable, ServerObject_itf {
 					RL,
 					WL
 	}
-	private List<Client_itf> clientUtilisateur;
+	private List<Client_itf> clientsUtilisateurs;
 	private lock lock_state;
 
 	public ServerObject(int id, Object objet){
 		this.id = id;
 		this.obj = objet;
 		this.lock_state = lock.NL;
-		this.clientUtilisateur = new ArrayList<Client_itf>();
+		this.clientsUtilisateurs = new ArrayList<Client_itf>();
 	}
 
 	public int getId() {
-		return id;
+		return this.id;
 	}
 
 	public Object getObj() {
-		return obj;
+		return this.obj;
 	}
 
 	
 
 	// invoked by the user program on the client node
 	public Object lock_read(Client_itf client) throws java.rmi.RemoteException{
-		switch (this.lock_state){
-			case WL :
-				Client_itf ancienUtilisateur = clientUtilisateur.remove(0);
-				Server.reduce_lock(id,ancienUtilisateur);
-			case NL :
-				this.lock_state = lock.RL;
-			case RL :
-				clientUtilisateur.add(client);
+		try {
+			switch (this.lock_state){
+				case WL :
+					Client_itf ancienUtilisateur = clientsUtilisateurs.remove(0);
+					this.obj = Server.reduce_lock(this.id,ancienUtilisateur);
+				case NL :
+					this.lock_state = lock.RL;
+				case RL :
+					clientsUtilisateurs.add(client);
+			}
+
+		} catch (Exception e){
+			e.printStackTrace();
 		}
-		return obj;
+		
+		return this.obj;
 	}
 
 	// invoked by the user program on the client node
 	public Object lock_write(Client_itf client) throws java.rmi.RemoteException{
 		switch (this.lock_state){
 			case RL :
-				while (!clientUtilisateur.isEmpty()) {
-					Client_itf ancienUtilisateur = clientUtilisateur.remove(0);
-					Server.invalidate_reader(id,ancienUtilisateur);	
+				while (!clientsUtilisateurs.isEmpty()) {
+					Client_itf ancienUtilisateur = clientsUtilisateurs.remove(0);
+					Server.invalidate_reader(this.id,ancienUtilisateur);	
 				}							
 			case NL :
 				this.lock_state = lock.WL;	
-				clientUtilisateur.add(client);
 				break;
 			case WL :
-				Client_itf ancienUtilisateur = clientUtilisateur.remove(0);
-				Server.invalidate_writer(id,ancienUtilisateur);
-				clientUtilisateur.add(client);
+				try {
+					Client_itf ancienUtilisateur = clientsUtilisateurs.remove(0);
+					this.obj = Server.invalidate_writer(this.id,ancienUtilisateur);
+				} catch (NullPointerException e) {
+					System.out.println(" No writers ");
+				} catch (RemoteException ee) {
+					System.out.println("Client disconnected");
+				}
+					
+				
 		}
-		return obj;
+		clientsUtilisateurs.add(client);
+		return this.obj;
 	}
 }

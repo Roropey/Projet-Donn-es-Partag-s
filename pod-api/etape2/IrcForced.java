@@ -41,23 +41,28 @@ public class IrcForced extends Frame {
 			double choice = Math.random();
 
 			if (choice < 0.5){
+
+				System.out.println(myName+" décide de lire.");
 				// lock the object in read mode
 				s.lock_read();
+				System.out.println(myName+" lit.");
 				// invoke the method
 				String sentence = ((Sentence)(s.obj)).read();
 				System.out.println("Read : "+sentence);
 				
 				// unlock the object
 				s.unlock();
+				System.out.println(myName+" a fini de lire.");
 			} else {
-				
+				System.out.println(myName+"décide d'écrire.");
 				s.lock_write();
-				
+				System.out.println(myName+" écrit.");
 				// invoke the method
-				((Sentence)(s.obj)).write(this.myName+" wrote");
+				((Sentence)(s.obj)).write(myName+" wrote");
 				
 				// unlock the object
 				s.unlock();
+				System.out.println(myName+" a fini d'écrire.");
 
 			}
 

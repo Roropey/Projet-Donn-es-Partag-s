@@ -41,11 +41,14 @@ public class IrcForcedSlow extends Frame {
 			double choice = Math.random();
 
 			if (choice < 0.5){
+				
+				System.out.println(myName+" décide de lire.");
 				// lock the object in read mode
 				s.lock_read();
-				// Wait 10s
+				System.out.println(myName+" lit.");
+				// Wait 5s
 				try{
-					Thread.sleep(10000);
+					Thread.sleep(5000);
 				} catch (Exception exc) {
 					exc.printStackTrace();
 				}
@@ -56,27 +59,35 @@ public class IrcForcedSlow extends Frame {
 				
 				// unlock the object
 				s.unlock();
+				
+				System.out.println(myName+" a fini de lire.");
+				
 			} else {
+				System.out.println(myName+" décide d'écrire.");
 				
 				s.lock_write();
-				// Wait 10s
+				
+				System.out.println(myName+" écrit.");
+				// Wait 5s
 				try{
-					Thread.sleep(10000);
+					Thread.sleep(5000);
 				} catch (Exception exc) {
 					exc.printStackTrace();
 				}
 		
 				
 				// invoke the method
-				((Sentence)(s.obj)).write(this.myName+" wrote");
+				((Sentence)(s.obj)).write(myName+" wrote");
 				
 				// unlock the object
 				s.unlock();
+				
+				System.out.println(myName+" a fini d'écrire.");
 
 			}
-			// Wait 5s
+			// Wait 2s
 			try{
-				Thread.sleep(5000);
+				Thread.sleep(2000);
 			} catch (Exception exc) {
 				exc.printStackTrace();
 			}
