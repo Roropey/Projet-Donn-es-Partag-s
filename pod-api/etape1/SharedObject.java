@@ -37,22 +37,16 @@ public class SharedObject implements Serializable, SharedObject_itf {
 
 	// invoked by the user program on the client node
 	public void lock_read() {
-		/*
-		if (this.obj != null){
-		System.out.println("lock_read sur "+this.obj.getClass().getName());
-		}else {
-			System.out.println("lock_read sur null");
-		}*/
+		
 		Boolean lockRead = false;
 		synchronized (this) {
-			// tant que l ’ attribut " attente " est vrai , on attend
 			while (this.waiting){
 				try {
 					wait();
 				} catch ( InterruptedException e ) {
 					e.printStackTrace ();
 				}
-			}
+			} 
 			switch (this.lock_state){
 				case NL :
 					lockRead = true;
@@ -76,7 +70,7 @@ public class SharedObject implements Serializable, SharedObject_itf {
 	public void lock_write() {
 		Boolean lockWrite = false;
 		synchronized (this) {
-			// tant que l ’ attribut " attente " est vrai , on attend
+			// tant que l’attribut "attente" est vrai , on attend
 			while (this.waiting){
 				try {
 					wait();
@@ -96,6 +90,7 @@ public class SharedObject implements Serializable, SharedObject_itf {
 			}
 		}
 		if (lockWrite){
+			System.out.println("Envoie lock_write");
 			this.obj = Client.lock_write(id);
 		}
 	}
@@ -179,6 +174,7 @@ public class SharedObject implements Serializable, SharedObject_itf {
 	}
 
 	public synchronized Object invalidate_writer() {
+		System.out.println("Reçois invalide_write");
 		
 		this.waiting = true;
 		switch (this.lock_state){

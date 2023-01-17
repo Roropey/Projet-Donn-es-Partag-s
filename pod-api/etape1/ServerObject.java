@@ -64,6 +64,7 @@ public class ServerObject implements Serializable, ServerObject_itf {
 				break;
 			case WL :
 				try {
+					System.out.println("lock_write sur WL");
 					Client_itf ancienUtilisateur = clientsUtilisateurs.remove(0);
 					this.obj = Server.invalidate_writer(this.id,ancienUtilisateur);
 				} catch (NullPointerException e) {

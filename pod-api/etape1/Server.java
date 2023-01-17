@@ -9,9 +9,7 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 
 	private Lock moniteurLookupCreator;
 	private static HashMap<Integer, Lock> moniteursServerObject;
-	//private static HashMap<Object,Integer> MapObjectToId = new HashMap<>();
 	private static HashMap<Integer,ServerObject> MapIntegerToServerObject;
-	//private static HashMap<Integer,Client_itf> UtilisationServerObject = new HashMap<>();
 	private HashMap<String,Integer> MapStringToInteger;
 	private static Integer nbObj = 0;
 
@@ -82,19 +80,12 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 	// request a read lock from the client
 	public Object lock_read(int id, Client_itf client) throws java.rmi.RemoteException{
 
-		//Lock moniteur = moniteursServerObject.get(id);
-		System.out.println("Server preLock lock_read sur "+Integer.toString(id));
-		//moniteur.lock();
-		System.out.println("Server postLock lock_read sur "+Integer.toString(id));
+		Lock moniteur = moniteursServerObject.get(id);
+		moniteur.lock();
 		ServerObject serverObject = MapIntegerToServerObject.get(id);
-		System.out.println("Server lock_read sur objet "+serverObject.getObj().getClass().getName());
-		//Client client_non_itf = (Client) client;
-		//UtilisationServerObject.put(id,client_non_itf);
 		Object objet = 	serverObject.lock_read(client);
-		System.out.println("Retour server lock_read : "+objet.getClass().getName());
-		//moniteur.unlock();
+		moniteur.unlock();
 		return objet ;
-		//return serverObject.getObj();
 			
 	}
 
@@ -102,43 +93,29 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 	public Object lock_write (int id, Client_itf client) throws java.rmi.RemoteException{
 
 		Lock moniteur = moniteursServerObject.get(id);
-		System.out.println("Server preLock lock_write sur "+Integer.toString(id));
-		//moniteur.lock();
-		
-		System.out.println("Server postLock lock_write sur "+Integer.toString(id));
+		moniteur.lock();
 		ServerObject serverObject = MapIntegerToServerObject.get(id);
-		
-		System.out.println("Server lock_write sur objet "+serverObject.getObj().getClass().getName());
-		//Client client_non_itf = (Client) client;
-		//UtilisationServerObject.put(id,client_non_itf);	
 		Object objet = 	serverObject.lock_write(client);
-		System.out.println("Retour server lock_write : "+objet.getClass().getName());
-		//moniteur.unlock();
+		moniteur.unlock();
 		return objet ;		
-		//return serverObject.getObj();
 		
 	}
 
 	public static Object reduce_lock(int id, Client_itf client) throws java.rmi.RemoteException{
-		//Client clientUtilisateur = UtilisationServerObject.get(id);
 		return client.reduce_lock(id);
 	}
 
 	public static void invalidate_reader(int id, Client_itf client) throws java.rmi.RemoteException{
-		//Client clientUtilisateur = UtilisationServerObject.get(id);
 		client.invalidate_reader(id);
 	}
 
 	public static Object invalidate_writer(int id, Client_itf client) throws java.rmi.RemoteException{
-		//Client clientUtilisateur = UtilisationServerObject.get(id);
 		return client.invalidate_writer(id);
 	}
 
 	public static void main(String args[]) {
 		Server.init();
 		System.out.println("Serveur initialisé.");
-		//Server.start();
-		//System.out.println("Serveur tourne.");
 	}
 
 }

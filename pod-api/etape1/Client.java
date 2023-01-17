@@ -139,8 +139,8 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 
 	// receive a writer invalidation request from the server
 	public Object invalidate_writer(int id) throws java.rmi.RemoteException {
+		
 		SharedObject sharedObject = MapIntegerToSObject.get(id);
-		sharedObject.invalidate_reader();
-		return sharedObject.getObj();
+		return sharedObject.invalidate_writer();
 	}
 }
