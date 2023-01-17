@@ -27,6 +27,7 @@ public class ServerObject implements Serializable, ServerObject_itf {
 	public Object getObj() {
 		return this.obj;
 	}
+	
 
 	
 

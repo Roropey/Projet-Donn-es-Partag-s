@@ -82,9 +82,9 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 	// request a read lock from the client
 	public Object lock_read(int id, Client_itf client) throws java.rmi.RemoteException{
 
-		Lock moniteur = moniteursServerObject.get(id);
+		//Lock moniteur = moniteursServerObject.get(id);
 		System.out.println("Server preLock lock_read sur "+Integer.toString(id));
-		moniteur.lock();
+		//moniteur.lock();
 		System.out.println("Server postLock lock_read sur "+Integer.toString(id));
 		ServerObject serverObject = MapIntegerToServerObject.get(id);
 		System.out.println("Server lock_read sur objet "+serverObject.getObj().getClass().getName());
@@ -92,7 +92,7 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 		//UtilisationServerObject.put(id,client_non_itf);
 		Object objet = 	serverObject.lock_read(client);
 		System.out.println("Retour server lock_read : "+objet.getClass().getName());
-		moniteur.unlock();
+		//moniteur.unlock();
 		return objet ;
 		//return serverObject.getObj();
 			
@@ -103,7 +103,7 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 
 		Lock moniteur = moniteursServerObject.get(id);
 		System.out.println("Server preLock lock_write sur "+Integer.toString(id));
-		moniteur.lock();
+		//moniteur.lock();
 		
 		System.out.println("Server postLock lock_write sur "+Integer.toString(id));
 		ServerObject serverObject = MapIntegerToServerObject.get(id);
@@ -113,7 +113,7 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 		//UtilisationServerObject.put(id,client_non_itf);	
 		Object objet = 	serverObject.lock_write(client);
 		System.out.println("Retour server lock_write : "+objet.getClass().getName());
-		moniteur.unlock();
+		//moniteur.unlock();
 		return objet ;		
 		//return serverObject.getObj();
 		

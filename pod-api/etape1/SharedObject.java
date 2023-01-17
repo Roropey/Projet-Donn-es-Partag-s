@@ -4,7 +4,7 @@ public class SharedObject implements Serializable, SharedObject_itf {
 	
 	private int id;
 	public Object obj;
-	private enum lock {NL,
+	public enum lock {NL,
 					RLC,
 					WLC,
 					RLT,
@@ -28,7 +28,11 @@ public class SharedObject implements Serializable, SharedObject_itf {
 	public Object getObj() {
 		return obj;
 	}
+	public lock getLock() {
+		return this.lock_state;
+	}
 
+	
 	
 
 	// invoked by the user program on the client node

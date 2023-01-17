@@ -28,6 +28,9 @@ public class SharedObject implements Serializable, SharedObject_itf {
 	public Object getObj() {
 		return obj;
 	}
+	public lock getLock() {
+		return lock_state;
+	}
 
 	
 

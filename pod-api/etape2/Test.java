@@ -5,7 +5,7 @@ import java.util.*;
 public class Test {
     public static void main(String args[]) {
         try{
-            Class<?> classTestee = Class.forName(args[0]);
+            Class<?> classTestee = Class.forName("TestBis");
         
 		
         Method[] methodes = classTestee.getMethods();
@@ -26,7 +26,13 @@ public class Test {
 
         }
         } catch(Exception e){
-            System.out.println("Error");
+            System.out.println("Error test 1");
+        }
+        try {
+            Object test = new Sentence_test();
+            Fonctions_generateur_stub.CreateStub(0, test);
+        } catch(Exception e){
+            System.out.println("Error test generateur stub");
         }
 	}
 }

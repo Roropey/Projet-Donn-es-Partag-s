@@ -8,15 +8,7 @@ import javax.xml.stream.events.EndDocument;
 
 
 public class Fonctions_generateur_stub {
-/*
-    public static void main(String[] args) throws ClassNotFoundException{
-        if(args.length != 1) {
-            System.out.println("java Generateur_stub <class>");
-            Generateurstub(Class.forName(args[0]));
-        }
-        
-    }
-    */
+
     public static SharedObject CreateStub (int id, Object objet){
         SharedObject sharedObject = null;
         try {
@@ -42,71 +34,158 @@ public class Fonctions_generateur_stub {
         try{ 
             Class<?> classe = objet.getClass();
             String className = classe.getName();
-            File classFile = new File(className+"_stub.java");
-            if (classFile.createNewFile()) {
-                FileWriter classFileWrite = new FileWriter(classFile);
+            File classFileStub = new File(className+"_stub.java");
+            File classFileItf = new File(className+"_itf.java");
+            if (classFileStub.createNewFile()) {
+                FileWriter classFileWriteStub = new FileWriter(classFileStub);
                 //writing start class
-                classFileWrite.write("public class "+className+"_stub extends SharedObject implements "+className+"_itf, java.io.Serializable {");
+                classFileWriteStub.write("public class "+className+"_stub extends SharedObject implements "+className+"_itf, java.io.Serializable {\n");
                 //writing constructor
-                classFileWrite.write("public "+className+"_stub (int id, Object obj) {super(id,obj);}");
+                classFileWriteStub.write("public "+className+"_stub(int id, Object obj) {\nsuper(id,obj);\n}\n");
+                Method[] basicMethodes = Class.forName("vide").getMethods();
                 Method[] methodes = classe.getMethods();
                 for (Method methode : methodes){
-                    
-                    String typeReturn = methode.getReturnType().getName();
-                    String nameMethode = methode.getName();
-                    Class<?>[] paramTypes = methode.getParameterTypes();
-                    int nbParam = methode.getParameterCount();
-                    String paramEtTypesString = "";
-                    String paramString = "";
-                    
-                    for (int i = 0;i<nbParam;i++){
-                        paramEtTypesString+=paramTypes[i].getName()+" a"+Integer.toString(i);
-                        paramString+="a"+Integer.toString(i);
-                        if (i<nbParam - 1){
-                            paramEtTypesString+=",";
-                            paramString+=",";
+                    Boolean NotNeeded = false;
+                    for (Method basicMethode : basicMethodes){
+                        NotNeeded = basicMethode.equals(methode) || NotNeeded;
+                    }
+                    if (!NotNeeded) {
+                        String typeReturn = methode.getReturnType().getName();
+                        if (typeReturn.equals("java.lang.Class")){
+                            typeReturn="Class<?>";
+                        } else if (typeReturn.equals("java.lang.String")){
+                            typeReturn="String";
+                        } else if (typeReturn.equals("java.lang.Object")){
+                            typeReturn="Object";
                         }
-                    
-                    }
-                    classFileWrite.write("public "+typeReturn+" "+nameMethode+" ("+paramEtTypesString+"){");
-                    /*if(methode.getAnnotation(Write.class)!=null){ 
-                        classFileWrite.write(className+" object = ("+className+") this.lock_write;");
-                    } elseif (methode.getAnnotation(Read.class)!=null){
-                        classFileWrite.write(className+" object = ("+className+") this.lock_read;");
-                    } else {
+                        String nameMethode = methode.getName();
+                        System.out.println(nameMethode);
+                        Class<?>[] paramTypes = methode.getParameterTypes();
+                        int nbParam = methode.getParameterCount();
+                        String paramEtTypesString = "";
+                        String paramString = "";
+                        
+                        for (int i = 0;i<nbParam;i++){
+                            String typeParam = paramTypes[i].getName();
+                            if (typeParam.equals("java.lang.Class")){
+                                typeParam="Class<?>";
+                            } else if (typeParam.equals("java.lang.String")){
+                                typeParam="String";
+                            } else if (typeParam.equals("java.lang.Object")){
+                                typeParam="Object";
+                            }
+                            paramEtTypesString+=typeParam+" a"+Integer.toString(i);
+                            
+                            paramString+="a"+Integer.toString(i);
+                            if (i<nbParam - 1){
+                                paramEtTypesString+=",";
+                                paramString+=",";
+                            }
+                        
+                        }
+                        classFileWriteStub.write("public "+typeReturn+" "+nameMethode+"("+paramEtTypesString+"){\n");
 
-                    */
-                    classFileWrite.write(className+" object = ("+className+") obj;");
-                    //}
-                    if (typeReturn.equals("void")){
-                        classFileWrite.write("object."+nameMethode+"("+paramString+");");
-                        /*if(methode.getAnnotation(Write.class)!=null) ||  (methode.getAnnotation(Read.class)!=null) { 
-                            classFileWrite.write("this.unlock();");
-                        }*/
-                    } else {
-                        /*if(methode.getAnnotation(Write.class)!=null) ||  (methode.getAnnotation(Read.class)!=null) {
-                         * classFileWrite.write("Object o =  object."+nameMethode+"("+paramString+"); this.unlock(); return o;");
-                         * }else{
-                        */
-                        classFileWrite.write("return object."+nameMethode+"("+paramString+");");
-                        //}
+                        if (methode.getAnnotation(Write.class)!=null) { 
+                            classFileWriteStub.write("this.lock_write();\n");
+                        } else if (methode.getAnnotation(Read.class)!=null) {
+                            classFileWriteStub.write("this.lock_read();\n");
+                        } 
+                        classFileWriteStub.write(className+" object = ("+className+") obj;\n");
+                        if (typeReturn.equals("void")){
+                            classFileWriteStub.write("object."+nameMethode+"("+paramString+");\n");
+                            if ((methode.getAnnotation(Write.class)!=null) ||  (methode.getAnnotation(Read.class)!=null)) { 
+                                classFileWriteStub.write("this.unlock();\n");
+                            }
+                        } else {
+                            if ((methode.getAnnotation(Write.class)!=null) ||  (methode.getAnnotation(Read.class)!=null)) {
+                                classFileWriteStub.write(typeReturn+ " r =  object."+nameMethode+"("+paramString+");\n this.unlock();\n return r;\n");
+                            }else{
+                            
+                            classFileWriteStub.write("return object."+nameMethode+"("+paramString+");\n");
+                            }
+                        }
+                        
+                        classFileWriteStub.write("}\n");
                     }
-                    
-                    classFileWrite.write("}");
                 }
-                classFileWrite.write("}");
+                classFileWriteStub.write("}");
         
-                classFileWrite.close();
-                //compiler et attendre fin compilation
-                classStub = Class.forName(className+"_stub");
+                classFileWriteStub.close(); 
+                
             } else {
                 System.out.println("Internal Error : "+className+"_stub.java already exists.");
             }
 
+            if (classFileItf.createNewFile()) {
+                FileWriter classFileWriteItf = new FileWriter(classFileItf);
+                //writing start class
+                classFileWriteItf.write("public interface "+className+"_itf extends SharedObject_itf {\n");
+                
+                Method[] basicMethodes = Class.forName("vide").getMethods();
+                Method[] methodes = classe.getMethods();
+                for (Method methode : methodes){
+                    Boolean NotNeeded = false;
+                    for (Method basicMethode : basicMethodes){
+                        NotNeeded = basicMethode.equals(methode) || NotNeeded;
+                    }
+                    if (!NotNeeded) {
+                    
+                        String typeReturn = methode.getReturnType().getName();
+                        if (typeReturn.equals("java.lang.Class")){
+                            typeReturn="Class<?>";
+                        } else if (typeReturn.equals("java.lang.String")){
+                            typeReturn="String";
+                        } else if (typeReturn.equals("java.lang.Object")){
+                            typeReturn="Object";
+                        }
+                        String nameMethode = methode.getName();
+                        Class<?>[] paramTypes = methode.getParameterTypes();
+                        int nbParam = methode.getParameterCount();
+                        String paramEtTypesString = "";
+                        
+                        for (int i = 0;i<nbParam;i++){
+                            String typeParam = paramTypes[i].getName();
+                            if (typeParam.equals("java.lang.Class")){
+                                typeParam="Class<?>";
+                            } else if (typeParam.equals("java.lang.String")){
+                                typeParam="String";
+                            } else if (typeParam.equals("java.lang.Object")){
+                                typeParam="Object";
+                            }
+                            paramEtTypesString+=typeParam+" a"+Integer.toString(i);
+                            if (i<nbParam - 1){
+                                paramEtTypesString+=",";
+                            }
+                        
+                        }
+                        classFileWriteItf.write("public "+typeReturn+" "+nameMethode+" ("+paramEtTypesString+");\n");
+                        }
+                }
+                classFileWriteItf.write("}");
+        
+                classFileWriteItf.close();
+                //compiler et attendre fin compilation
+                
+                //ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+
+                //classItf = classLoader.loadClass(className+"_itf");
+            } else {
+                System.out.println("Internal Error : "+className+"_itf.java already exists.");
+            }
+            String[] commandeStub = new String[] {"javac",className+"_itf.java"};
+            Process processEnCours = Runtime.getRuntime().exec(commandeStub);
+            processEnCours.waitFor();
+            String[] commandeItf = new String[] {"javac",className+"_stub.java"};
+            processEnCours = Runtime.getRuntime().exec(commandeItf);
+            processEnCours.waitFor();
+            ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+
+            classStub = classLoader.loadClass(className+"_stub");
+
         } catch (Exception e){
 			e.printStackTrace();
 		}
-        return null;
+        return classStub;
     }
 }
 
