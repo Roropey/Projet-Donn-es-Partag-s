@@ -8,10 +8,11 @@ import java.lang.*;
 import java.rmi.registry.*;
 
 
-public class Irc extends Frame {
+public class Irc_using_sentence_user extends Frame {
 	public TextArea		text;
 	public TextField	data;
 	Sentence_itf		sentence;
+	Sentence_user_itf	sentence_user;
 	static String		myName;
 
 	public static void main(String argv[]) {
@@ -27,16 +28,22 @@ public class Irc extends Frame {
 		
 		// look up the IRC object in the name server
 		// if not found, create it, and register it in the name server
-		Sentence_itf s = (Sentence_itf)Client.lookup("IRC");
+		Sentence_itf s = (Sentence_itf) Client.lookup("IRC");
 		if (s == null) {
 			s = (Sentence_itf)Client.create(new Sentence());
 			Client.register("IRC", s);
 		}
+
+		Sentence_user_itf s_user = (Sentence_user_itf) Client.lookup("IRC using IRC");
+		if (s_user == null) {
+			s_user = (Sentence_user_itf) Client.create(new Sentence_user(((Sentence) ((SharedObject)s).getObj())));
+			Client.register("IRC using IRC", s_user);
+		}
 		// create the graphical part
-		new Irc(s);
+		new Irc_using_sentence_user(s_user);
 	}
 
-	public Irc(Sentence_itf s) {
+	public Irc_using_sentence_user(Sentence_user_itf s) {
 	
 		setLayout(new FlowLayout());
 	
@@ -49,25 +56,25 @@ public class Irc extends Frame {
 		add(data);
 	
 		Button write_button = new Button("write");
-		write_button.addActionListener(new writeListener(this));
+		write_button.addActionListener(new writeListener_user(this));
 		add(write_button);
 		Button read_button = new Button("read");
-		read_button.addActionListener(new readListener(this));
+		read_button.addActionListener(new readListener_user(this));
 		add(read_button);
 		
 		setSize(470,300);
 		text.setBackground(Color.black); 
 		show();		
 		
-		sentence = s;
+		sentence_user = s;
 	}
 }
 
 
 
-class readListener implements ActionListener {
-	Irc irc;
-	public readListener (Irc i) {
+class readListener_user implements ActionListener {
+	Irc_using_sentence_user irc;
+	public readListener_user (Irc_using_sentence_user i) {
 		irc = i;
 	}
 	public void actionPerformed (ActionEvent e) {
@@ -76,19 +83,20 @@ class readListener implements ActionListener {
 		//irc.sentence.lock_read();
 		
 		// invoke the method
-		String s = irc.sentence.read();
+		String s = irc.sentence_user.read();
+		int hashCode = irc.sentence_user.sentenceHashCode();
 		
 		// unlock the object
 		//irc.sentence.unlock();
 		
 		// display the read value
-		irc.text.append(s+"\n");
+		irc.text.append(s+" "+Integer.toString(hashCode)+"\n");
 	}
 }
 
-class writeListener implements ActionListener {
-	Irc irc;
-	public writeListener (Irc i) {
+class writeListener_user implements ActionListener {
+	Irc_using_sentence_user irc;
+	public writeListener_user (Irc_using_sentence_user i) {
         	irc = i;
 	}
 	public void actionPerformed (ActionEvent e) {
@@ -100,7 +108,7 @@ class writeListener implements ActionListener {
 		//irc.sentence.lock_write();
 		
 		// invoke the method
-		irc.sentence.write(Irc.myName+" wrote "+s);
+		irc.sentence_user.write(Irc_using_sentence_user.myName+" wrote "+s);
 		irc.data.setText("");
 		
 		// unlock the object

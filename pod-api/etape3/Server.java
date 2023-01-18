@@ -43,10 +43,12 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 		
 		if (MapStringToInteger.get(name)!=null){
 			
-			System.out.println("Unlock moniteur serveur");
 			moniteurLookupCreator.unlock();
+			System.out.println("Débloquer pour prochain client");
 			return MapStringToInteger.get(name);
 		} else {
+			
+			System.out.println("Bloquer pour prochain client, attente réalisation create et register");
 			return -1 ;
 		}
 
@@ -65,6 +67,7 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 	public void register(String name, int id) {
 		MapStringToInteger.put(name,id);
 		moniteurLookupCreator.unlock();
+		System.out.println("Débloquer pour prochain client");
 
 	}
 

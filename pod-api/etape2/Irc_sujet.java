@@ -8,7 +8,7 @@ import java.lang.*;
 import java.rmi.registry.*;
 
 
-public class Irc extends Frame {
+public class Irc_sujet extends Frame {
 	public TextArea		text;
 	public TextField	data;
 	Sentence_itf		sentence;
@@ -33,10 +33,10 @@ public class Irc extends Frame {
 			Client.register("IRC", s);
 		}
 		// create the graphical part
-		new Irc(s);
+		new Irc_sujet(s);
 	}
 
-	public Irc(Sentence_itf s) {
+	public Irc_sujet(Sentence_itf s) {
 	
 		setLayout(new FlowLayout());
 	
@@ -49,10 +49,10 @@ public class Irc extends Frame {
 		add(data);
 	
 		Button write_button = new Button("write");
-		write_button.addActionListener(new writeListener(this));
+		write_button.addActionListener(new writeListener_sujet(this));
 		add(write_button);
 		Button read_button = new Button("read");
-		read_button.addActionListener(new readListener(this));
+		read_button.addActionListener(new readListener_sujet(this));
 		add(read_button);
 		
 		setSize(470,300);
@@ -65,30 +65,30 @@ public class Irc extends Frame {
 
 
 
-class readListener implements ActionListener {
-	Irc irc;
-	public readListener (Irc i) {
+class readListener_sujet implements ActionListener {
+	Irc_sujet irc;
+	public readListener_sujet (Irc_sujet i) {
 		irc = i;
 	}
 	public void actionPerformed (ActionEvent e) {
 		
 		// lock the object in read mode
-		//irc.sentence.lock_read();
+		irc.sentence.lock_read();
 		
 		// invoke the method
 		String s = irc.sentence.read();
 		
 		// unlock the object
-		//irc.sentence.unlock();
+		irc.sentence.unlock();
 		
 		// display the read value
 		irc.text.append(s+"\n");
 	}
 }
 
-class writeListener implements ActionListener {
-	Irc irc;
-	public writeListener (Irc i) {
+class writeListener_sujet implements ActionListener {
+	Irc_sujet irc;
+	public writeListener_sujet (Irc_sujet i) {
         	irc = i;
 	}
 	public void actionPerformed (ActionEvent e) {
@@ -97,14 +97,14 @@ class writeListener implements ActionListener {
         	String s = irc.data.getText();
         	
         	// lock the object in write mode
-		//irc.sentence.lock_write();
+		irc.sentence.lock_write();
 		
 		// invoke the method
 		irc.sentence.write(Irc.myName+" wrote "+s);
 		irc.data.setText("");
 		
 		// unlock the object
-		//irc.sentence.unlock();
+		irc.sentence.unlock();
 	}
 }
 

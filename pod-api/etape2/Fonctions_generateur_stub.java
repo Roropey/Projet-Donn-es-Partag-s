@@ -50,14 +50,9 @@ public class Fonctions_generateur_stub {
                 classFileWriteStub.write("public class "+className+"_stub extends SharedObject implements "+className+"_itf, java.io.Serializable {\n");
                 //writing constructor
                 classFileWriteStub.write("    public "+className+"_stub(int id, Object obj) {\n        super(id,obj);\n    }\n");
-                Method[] basicMethodes = Class.forName("vide").getMethods();
                 Method[] methodes = classe.getMethods();
                 for (Method methode : methodes){
-                    Boolean NotNeeded = false;
-                    for (Method basicMethode : basicMethodes){
-                        NotNeeded = basicMethode.equals(methode) || NotNeeded;
-                    }
-                    if (!NotNeeded) {
+                    if (classe.equals(methode.getDeclaringClass())) {
                         String typeReturn = methode.getReturnType().getName();
                         if (typeReturn.equals("java.lang.Class")){
                             typeReturn="Class<?>";
@@ -132,14 +127,9 @@ public class Fonctions_generateur_stub {
                 //writing start class
                 classFileWriteItf.write("public interface "+className+"_itf extends SharedObject_itf {\n");
                 
-                Method[] basicMethodes = Class.forName("vide").getMethods();
                 Method[] methodes = classe.getMethods();
                 for (Method methode : methodes){
-                    Boolean NotNeeded = false;
-                    for (Method basicMethode : basicMethodes){
-                        NotNeeded = basicMethode.equals(methode) || NotNeeded;
-                    }
-                    if (!NotNeeded) {
+                    if (classe.equals(methode.getDeclaringClass())) {
                     
                         String typeReturn = methode.getReturnType().getName();
                         if (typeReturn.equals("java.lang.Class")){

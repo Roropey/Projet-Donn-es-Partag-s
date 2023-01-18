@@ -33,7 +33,7 @@ public class Irc extends Frame {
 			Client.register("IRC", s);
 		}
 		// create the graphical part
-		new Irc_sujet(s);
+		new Irc(s);
 	}
 
 	public Irc(Sentence_itf s) {
