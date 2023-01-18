@@ -38,15 +38,15 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 	
 	// lookup in the name server
 	public int lookup(String name) {
-		System.out.println("Connection lookup");
 		moniteurLookupCreator.lock();
 		
 		if (MapStringToInteger.get(name)!=null){
-			
-			System.out.println("Unlock moniteur serveur");
+			System.out.println("Débloquer pour prochain client");
 			moniteurLookupCreator.unlock();
 			return MapStringToInteger.get(name);
 		} else {
+			
+			System.out.println("Bloquer pour prochain client, attente réalisation create et register");
 			return -1 ;
 		}
 
@@ -121,10 +121,16 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 	public static Object invalidate_writer(int id, Client_itf client) throws java.rmi.RemoteException{
 		return client.invalidate_writer(id);
 	}
+	
+/////////////////////////////////////////////////////////////
+//    Methode d'execution du serveur
+////////////////////////////////////////////////////////////
 
-	public static void main(String args[]) {
-		Server.init();
-		System.out.println("Serveur initialisé.");
-	}
+public static void main(String args[]) {
+		
+	System.out.println("Initialisation du serveur...");
+	Server.init();
+	System.out.println("Serveur initialisé.");
+}
 
 }

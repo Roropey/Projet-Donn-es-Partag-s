@@ -54,13 +54,11 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 	public static SharedObject lookup(String name) {
 		SharedObject sharedObject = null;
 		try {
-			System.out.println("Tentative lookup");
 			int id = serveur.lookup(name);
 			
-			System.out.println("Id return"+Integer.toString(id));
-
 			if (id>=0) {
-				if (MapIntegerToSharedObject.get(id) == null){
+				if (MapIntegerToSharedObject.get(id) == null){					
+					System.out.println("Objet existant dans serveur mais pas client => création objet client");
 					Object objet = serveur.getObject(id);
 					create_memorize_stub(id, objet);
 				}
@@ -152,7 +150,7 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 	// receive a writer invalidation request from the server
 	public Object invalidate_writer(int id) throws java.rmi.RemoteException {
 		SharedObject sharedObject = MapIntegerToSharedObject.get(id);
-		sharedObject.invalidate_reader();
+		sharedObject.invalidate_writer();
 		return sharedObject.getObj();
 	}
 	

@@ -90,7 +90,6 @@ public class SharedObject implements Serializable, SharedObject_itf {
 			}
 		}
 		if (lockWrite){
-			System.out.println("Envoie lock_write");
 			this.obj = Client.lock_write(id);
 		}
 	}
@@ -174,8 +173,6 @@ public class SharedObject implements Serializable, SharedObject_itf {
 	}
 
 	public synchronized Object invalidate_writer() {
-		System.out.println("Reçois invalide_write");
-		
 		this.waiting = true;
 		switch (this.lock_state){
 			case WLT :

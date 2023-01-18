@@ -49,7 +49,7 @@ public class Fonctions_generateur_stub {
                 //writing start class
                 classFileWriteStub.write("public class "+className+"_stub extends SharedObject implements "+className+"_itf, java.io.Serializable {\n");
                 //writing constructor
-                classFileWriteStub.write("public "+className+"_stub(int id, Object obj) {\nsuper(id,obj);\n}\n");
+                classFileWriteStub.write("public "+className+"_stub(int id, Object obj) {\n    super(id,obj);\n}\n");
                 Method[] basicMethodes = Class.forName("vide").getMethods();
                 Method[] methodes = classe.getMethods();
                 for (Method methode : methodes){
@@ -94,22 +94,22 @@ public class Fonctions_generateur_stub {
                         classFileWriteStub.write("public "+typeReturn+" "+nameMethode+"("+paramEtTypesString+"){\n");
 
                         if (methode.getAnnotation(Write.class)!=null) { 
-                            classFileWriteStub.write("this.lock_write();\n");
+                            classFileWriteStub.write("    this.lock_write();\n");
                         } else if (methode.getAnnotation(Read.class)!=null) {
-                            classFileWriteStub.write("this.lock_read();\n");
+                            classFileWriteStub.write("    this.lock_read();\n");
                         } 
-                        classFileWriteStub.write(className+" object = ("+className+") obj;\n");
+                        classFileWriteStub.write("    "+className+" object = ("+className+") obj;\n");
                         if (typeReturn.equals("void")){
-                            classFileWriteStub.write("object."+nameMethode+"("+paramString+");\n");
+                            classFileWriteStub.write("    object."+nameMethode+"("+paramString+");\n");
                             if ((methode.getAnnotation(Write.class)!=null) ||  (methode.getAnnotation(Read.class)!=null)) { 
-                                classFileWriteStub.write("this.unlock();\n");
+                                classFileWriteStub.write("    this.unlock();\n");
                             }
                         } else {
                             if ((methode.getAnnotation(Write.class)!=null) ||  (methode.getAnnotation(Read.class)!=null)) {
-                                classFileWriteStub.write(typeReturn+ " r =  object."+nameMethode+"("+paramString+");\n this.unlock();\n return r;\n");
+                                classFileWriteStub.write(typeReturn+ "    r = object."+nameMethode+"("+paramString+");\n    this.unlock();\n    return r;\n");
                             }else{
                             
-                            classFileWriteStub.write("return object."+nameMethode+"("+paramString+");\n");
+                            classFileWriteStub.write("  return object."+nameMethode+"("+paramString+");\n");
                             }
                         }
                         

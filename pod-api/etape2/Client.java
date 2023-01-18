@@ -13,7 +13,7 @@ import javax.xml.stream.events.EndDocument;
 
 public class Client extends UnicastRemoteObject implements Client_itf {
 
-	private static HashMap<Integer,SharedObject> MapIntegerToSObject;
+	private static HashMap<Integer,SharedObject> MapIntegerToSharedObject;
 	private static Server_itf serveur;
 	private static Client clientActuel = null;
 
@@ -39,7 +39,7 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 
 			try {
 				serveur = (Server_itf) Naming.lookup("//localhost:4000/serveur");
-				MapIntegerToSObject = new HashMap<Integer,SharedObject>();
+				MapIntegerToSharedObject = new HashMap<Integer,SharedObject>();
 			} catch (Exception e){
 				System.out.println("Echec connection serveur");
 				e.printStackTrace();
@@ -54,18 +54,16 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 	public static SharedObject lookup(String name) {
 		SharedObject sharedObject = null;
 		try {
-			System.out.println("Tentative lookup");
-			int id = serveur.lookup(name);
-			
-			System.out.println("Id return"+Integer.toString(id));
+			int id = serveur.lookup(name);			
 
 			if (id>=0) {
-				if (MapIntegerToSObject.get(id) == null){
+				if (MapIntegerToSharedObject.get(id) == null){
+					System.out.println("Objet existant dans serveur mais pas client => création objet client");
 					Object objet = serveur.getObject(id);
 					SharedObject sharedObjectCreated = Fonctions_generateur_stub.CreateStub(id, objet);
-					MapIntegerToSObject.put(id,sharedObjectCreated);
+					MapIntegerToSharedObject.put(id,sharedObjectCreated);
 				}
-				sharedObject = MapIntegerToSObject.get(id);
+				sharedObject = MapIntegerToSharedObject.get(id);
 			}
 		} catch (Exception e){
 
@@ -75,8 +73,7 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 		}
 		return sharedObject;
 		
-	}		
-	
+	}	
 	// binding in the name server
 	public static void register(String name, SharedObject_itf so_itf) {
 		try {
@@ -93,7 +90,7 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 			int id = serveur.create(o);
 			sharedObject = Fonctions_generateur_stub.CreateStub(id, o);
 			
-			MapIntegerToSObject.put(id,sharedObject);
+			MapIntegerToSharedObject.put(id,sharedObject);
 
 			
 		} catch (RemoteException e){
@@ -131,7 +128,7 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 
 	// receive a lock reduction request from the server
 	public Object reduce_lock(int id) throws java.rmi.RemoteException {
-		SharedObject sharedObject = MapIntegerToSObject.get(id);
+		SharedObject sharedObject = MapIntegerToSharedObject.get(id);
 		sharedObject.reduce_lock();
 		return sharedObject.getObj();
 	}
@@ -139,16 +136,15 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 
 	// receive a reader invalidation request from the server
 	public void invalidate_reader(int id) throws java.rmi.RemoteException {
-		SharedObject sharedObject = MapIntegerToSObject.get(id);
+		SharedObject sharedObject = MapIntegerToSharedObject.get(id);
 		sharedObject.invalidate_reader();
 	}
 
 
 	// receive a writer invalidation request from the server
 	public Object invalidate_writer(int id) throws java.rmi.RemoteException {
-		SharedObject sharedObject = MapIntegerToSObject.get(id);
-		sharedObject.invalidate_reader();
+		SharedObject sharedObject = MapIntegerToSharedObject.get(id);
+		sharedObject.invalidate_writer();
 		return sharedObject.getObj();
 	}
-
 }

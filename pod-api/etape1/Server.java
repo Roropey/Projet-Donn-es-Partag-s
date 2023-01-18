@@ -112,10 +112,16 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 	public static Object invalidate_writer(int id, Client_itf client) throws java.rmi.RemoteException{
 		return client.invalidate_writer(id);
 	}
+	
+/////////////////////////////////////////////////////////////
+//    Methode d'execution du serveur
+////////////////////////////////////////////////////////////
 
-	public static void main(String args[]) {
-		Server.init();
-		System.out.println("Serveur initialisé.");
-	}
+public static void main(String args[]) {
+		
+	System.out.println("Initialisation du serveur...");
+	Server.init();
+	System.out.println("Serveur initialisé.");
+}
 
 }

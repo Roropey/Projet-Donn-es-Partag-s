@@ -15,19 +15,22 @@ public class Fonctions_generateur_stub {
             String className = objet.getClass().getName();
             Class<?> classStub = null;
             try {
-                classStub = Class.forName(className+"_stub");
+                System.out.println("Recherche "+className+"_stub.class ...");
+                classStub = Class.forName(className+"_stub");                
+                System.out.println(className+"_stub.class trouvée");
             } catch (ClassNotFoundException e){                
                 System.out.println("Création class...");
                 classStub = GenerateurClassStub(objet);
                 System.out.println("...Class créée et récupérée");
             }
-            System.out.println("Récupération constructeur");
+            System.out.println("Récupération constructeur...");
             Constructor <?> constructeur = classStub.getConstructor(new Class[]{int.class, Object.class});
-            System.out.println("Création Shared Object");
+            System.out.println("Création Shared Object...");
             sharedObject = (SharedObject) constructeur.newInstance(new Object[]{id,objet});
         } catch (Exception e){
 			e.printStackTrace();
 		}
+        System.out.println("Retour du Shared Object");
         return sharedObject;
     }
 
@@ -46,7 +49,7 @@ public class Fonctions_generateur_stub {
                 //writing start class
                 classFileWriteStub.write("public class "+className+"_stub extends SharedObject implements "+className+"_itf, java.io.Serializable {\n");
                 //writing constructor
-                classFileWriteStub.write("public "+className+"_stub(int id, Object obj) {\nsuper(id,obj);\n}\n");
+                classFileWriteStub.write("    public "+className+"_stub(int id, Object obj) {\n        super(id,obj);\n    }\n");
                 Method[] basicMethodes = Class.forName("vide").getMethods();
                 Method[] methodes = classe.getMethods();
                 for (Method methode : methodes){
@@ -88,29 +91,29 @@ public class Fonctions_generateur_stub {
                             }
                         
                         }
-                        classFileWriteStub.write("public "+typeReturn+" "+nameMethode+"("+paramEtTypesString+"){\n");
+                        classFileWriteStub.write("    public "+typeReturn+" "+nameMethode+"("+paramEtTypesString+"){\n");
 
                         if (methode.getAnnotation(Write.class)!=null) { 
-                            classFileWriteStub.write("this.lock_write();\n");
+                            classFileWriteStub.write("        this.lock_write();\n");
                         } else if (methode.getAnnotation(Read.class)!=null) {
-                            classFileWriteStub.write("this.lock_read();\n");
+                            classFileWriteStub.write("        this.lock_read();\n");
                         } 
-                        classFileWriteStub.write(className+" object = ("+className+") obj;\n");
+                        classFileWriteStub.write("        "+className+" object = ("+className+") obj;\n");
                         if (typeReturn.equals("void")){
-                            classFileWriteStub.write("object."+nameMethode+"("+paramString+");\n");
+                            classFileWriteStub.write("        object."+nameMethode+"("+paramString+");\n");
                             if ((methode.getAnnotation(Write.class)!=null) ||  (methode.getAnnotation(Read.class)!=null)) { 
-                                classFileWriteStub.write("this.unlock();\n");
+                                classFileWriteStub.write("        this.unlock();\n");
                             }
                         } else {
                             if ((methode.getAnnotation(Write.class)!=null) ||  (methode.getAnnotation(Read.class)!=null)) {
-                                classFileWriteStub.write(typeReturn+ " r =  object."+nameMethode+"("+paramString+");\n this.unlock();\n return r;\n");
+                                classFileWriteStub.write("        "+typeReturn+ " r = object."+nameMethode+"("+paramString+");\n        this.unlock();\n        return r;\n");
                             }else{
                             
-                            classFileWriteStub.write("return object."+nameMethode+"("+paramString+");\n");
+                            classFileWriteStub.write("      return object."+nameMethode+"("+paramString+");\n");
                             }
                         }
                         
-                        classFileWriteStub.write("}\n");
+                        classFileWriteStub.write("    }\n");
                     }
                 }
                 classFileWriteStub.write("}");
@@ -147,7 +150,7 @@ public class Fonctions_generateur_stub {
                             typeReturn="Object";
                         }
                         String nameMethode = methode.getName();
-                        System.out.println("Ecriture dans ift méthode : "+nameMethode);
+                        System.out.println("Ecriture dans itf méthode : "+nameMethode);
                         Class<?>[] paramTypes = methode.getParameterTypes();
                         int nbParam = methode.getParameterCount();
                         String paramEtTypesString = "";
@@ -175,15 +178,25 @@ public class Fonctions_generateur_stub {
                 classFileWriteItf.close();
                 System.out.println("Fin écriture "+className+"_itf.java");
             } else {
-                System.out.println("Internal Error : "+className+"_itf.java already exists.");
+                System.out.println(className+"_itf.java already exists.");
             }            
             System.out.println("Compilation...");
-            String[] commandeItf = new String[] {"javac",className+"_itf.java"};
-            Process processEnCours = Runtime.getRuntime().exec(commandeItf);
-            processEnCours.waitFor();
-            String[] commandeStub = new String[] {"javac",className+"_stub.java"};
-            processEnCours = Runtime.getRuntime().exec(commandeStub);
-            processEnCours.waitFor();
+            try {
+                String[] commandeItf = new String[] {"javac",className+"_itf.java"};
+                Process processEnCours = Runtime.getRuntime().exec(commandeItf);
+                processEnCours.waitFor();
+            } catch (Exception e){
+                System.out.println("Compilation de "+className+"_itf.java a échoué.");
+			    e.printStackTrace();
+            }
+            try {
+                String[] commandeStub = new String[] {"javac",className+"_stub.java"};
+                Process processEnCours = Runtime.getRuntime().exec(commandeStub);
+                processEnCours.waitFor();
+            } catch (Exception e){
+                System.out.println("Compilation de "+className+"_itf.java a échoué.");
+                e.printStackTrace();
+            }
             
             System.out.println("Réucpération class...");
             ClassLoader classLoader = ClassLoader.getSystemClassLoader();
