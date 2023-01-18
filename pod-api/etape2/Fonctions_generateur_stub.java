@@ -16,11 +16,14 @@ public class Fonctions_generateur_stub {
             Class<?> classStub = null;
             try {
                 classStub = Class.forName(className+"_stub");
-            } catch (ClassNotFoundException e){
+            } catch (ClassNotFoundException e){                
+                System.out.println("Création class...");
                 classStub = GenerateurClassStub(objet);
+                System.out.println("...Class créée et récupérée");
             }
-            Object stub = null;
+            System.out.println("Récupération constructeur");
             Constructor <?> constructeur = classStub.getConstructor(new Class[]{int.class, Object.class});
+            System.out.println("Création Shared Object");
             sharedObject = (SharedObject) constructeur.newInstance(new Object[]{id,objet});
         } catch (Exception e){
 			e.printStackTrace();
@@ -37,6 +40,8 @@ public class Fonctions_generateur_stub {
             File classFileStub = new File(className+"_stub.java");
             File classFileItf = new File(className+"_itf.java");
             if (classFileStub.createNewFile()) {
+                
+                System.out.println("Début écriture "+className+"_stub.java");
                 FileWriter classFileWriteStub = new FileWriter(classFileStub);
                 //writing start class
                 classFileWriteStub.write("public class "+className+"_stub extends SharedObject implements "+className+"_itf, java.io.Serializable {\n");
@@ -59,7 +64,7 @@ public class Fonctions_generateur_stub {
                             typeReturn="Object";
                         }
                         String nameMethode = methode.getName();
-                        System.out.println(nameMethode);
+                        System.out.println("Ecriture dans stub méthode : "+nameMethode);
                         Class<?>[] paramTypes = methode.getParameterTypes();
                         int nbParam = methode.getParameterCount();
                         String paramEtTypesString = "";
@@ -111,12 +116,15 @@ public class Fonctions_generateur_stub {
                 classFileWriteStub.write("}");
         
                 classFileWriteStub.close(); 
+                System.out.println("Fin écriture "+className+"_stub.java");
                 
             } else {
                 System.out.println("Internal Error : "+className+"_stub.java already exists.");
             }
 
             if (classFileItf.createNewFile()) {
+                
+                System.out.println("Début écriture "+className+"_itf.java");
                 FileWriter classFileWriteItf = new FileWriter(classFileItf);
                 //writing start class
                 classFileWriteItf.write("public interface "+className+"_itf extends SharedObject_itf {\n");
@@ -139,6 +147,7 @@ public class Fonctions_generateur_stub {
                             typeReturn="Object";
                         }
                         String nameMethode = methode.getName();
+                        System.out.println("Ecriture dans ift méthode : "+nameMethode);
                         Class<?>[] paramTypes = methode.getParameterTypes();
                         int nbParam = methode.getParameterCount();
                         String paramEtTypesString = "";
@@ -164,20 +173,19 @@ public class Fonctions_generateur_stub {
                 classFileWriteItf.write("}");
         
                 classFileWriteItf.close();
-                //compiler et attendre fin compilation
-                
-                //ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-
-                //classItf = classLoader.loadClass(className+"_itf");
+                System.out.println("Fin écriture "+className+"_itf.java");
             } else {
                 System.out.println("Internal Error : "+className+"_itf.java already exists.");
-            }
-            String[] commandeStub = new String[] {"javac",className+"_itf.java"};
-            Process processEnCours = Runtime.getRuntime().exec(commandeStub);
+            }            
+            System.out.println("Compilation...");
+            String[] commandeItf = new String[] {"javac",className+"_itf.java"};
+            Process processEnCours = Runtime.getRuntime().exec(commandeItf);
             processEnCours.waitFor();
-            String[] commandeItf = new String[] {"javac",className+"_stub.java"};
-            processEnCours = Runtime.getRuntime().exec(commandeItf);
+            String[] commandeStub = new String[] {"javac",className+"_stub.java"};
+            processEnCours = Runtime.getRuntime().exec(commandeStub);
             processEnCours.waitFor();
+            
+            System.out.println("Réucpération class...");
             ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 
             classStub = classLoader.loadClass(className+"_stub");

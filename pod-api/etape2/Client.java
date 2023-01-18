@@ -61,9 +61,8 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 
 			if (id>=0) {
 				if (MapIntegerToSObject.get(id) == null){
-					Object objet = lock_read(id);
+					Object objet = serveur.getObject(id);
 					SharedObject sharedObjectCreated = Fonctions_generateur_stub.CreateStub(id, objet);
-					sharedObjectCreated.unlock();
 					MapIntegerToSObject.put(id,sharedObjectCreated);
 				}
 				sharedObject = MapIntegerToSObject.get(id);
