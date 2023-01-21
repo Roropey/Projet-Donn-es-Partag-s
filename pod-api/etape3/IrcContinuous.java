@@ -109,7 +109,7 @@ class IrcForced extends Thread {
 
 			}
 			try {				
-				Thread.sleep(10);
+				//Thread.sleep(10);
 			} catch (Exception e){
 				e.printStackTrace();
 			}
