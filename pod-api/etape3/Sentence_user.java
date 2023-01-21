@@ -1,9 +1,9 @@
 public class Sentence_user implements java.io.Serializable{
 
-    private Sentence sentenceUsed;
+    SharedObject sentence;
 
-    public Sentence_user(Sentence sentenceUsed) {
-        this.sentenceUsed = sentenceUsed;
+    public Sentence_user() {
+        
     }
 
     @Write

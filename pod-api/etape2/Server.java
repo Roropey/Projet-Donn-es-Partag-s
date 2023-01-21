@@ -10,12 +10,12 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 	private Lock moniteurLookupCreator;
 	private static HashMap<Integer, Lock> moniteursServerObject;
 	private static HashMap<Integer,ServerObject> MapIntegerToServerObject;
-	private static HashMap<String,Integer> MapStringToInteger;
+	private HashMap<String,Integer> MapStringToInteger;
 	private static Integer nbObj = 0;
 
 	public Server() throws RemoteException {
 		super();
-		MapStringToInteger = new HashMap<>();
+		this.MapStringToInteger = new HashMap<>();
 		MapIntegerToServerObject = new HashMap<>();
 		moniteursServerObject = new HashMap<>();
 		moniteurLookupCreator = new ReentrantLock();
@@ -38,32 +38,26 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 	
 	// lookup in the name server
 	public int lookup(String name) {
+		System.out.println("Connection lookup");
 		moniteurLookupCreator.lock();
 		
-		if (MapStringToInteger.get(name)!=null){
-			moniteurLookupCreator.unlock();			
+		if (this.MapStringToInteger.get(name)!=null){
+			
+			moniteurLookupCreator.unlock();
+			
 			System.out.println("Débloquer pour prochain client");
-			return MapStringToInteger.get(name);
+			return this.MapStringToInteger.get(name);
 		} else {
 			
 			System.out.println("Bloquer pour prochain client, attente réalisation create et register");
 			return -1 ;
 		}
 
-	}	
-	
-	public Object getObject(int id){
-		Object obj = null;
-		if (MapIntegerToServerObject.get(id)!=null){
-			obj = MapIntegerToServerObject.get(id).getObj();
-		}
-		return obj;
-
-	}
+	}		
 	
 	// binding in the name server
 	public void register(String name, int id) {
-		MapStringToInteger.put(name,id);
+		this.MapStringToInteger.put(name,id);
 		moniteurLookupCreator.unlock();
 		
 		System.out.println("Débloquer pour prochain client");
@@ -123,16 +117,24 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 	public static Object invalidate_writer(int id, Client_itf client) throws java.rmi.RemoteException{
 		return client.invalidate_writer(id);
 	}
-	
-/////////////////////////////////////////////////////////////
-//    Methode d'execution du serveur
-////////////////////////////////////////////////////////////
 
-public static void main(String args[]) {
+	/////////////////////////////////////////////////////////////
+	//    Methode utile pour création de stub
+	////////////////////////////////////////////////////////////
 		
-	System.out.println("Initialisation du serveur...");
-	Server.init();
-	System.out.println("Serveur initialisé.");
-}
+	public Object getObject(int id) throws java.rmi.RemoteException{
+		return MapIntegerToServerObject.get(id).getObj();
+	}
+
+	/////////////////////////////////////////////////////////////
+	//    Methode d'execution du serveur
+	////////////////////////////////////////////////////////////
+
+	public static void main(String args[]) {
+			
+		System.out.println("Initialisation du serveur...");
+		Server.init();
+		System.out.println("Serveur initialisé.");
+	}
 
 }

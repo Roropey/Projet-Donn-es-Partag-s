@@ -1,8 +1,6 @@
 import java.net.*;
 import java.io.*;
 
-import java.util.*;
-import java.util.concurrent.locks.*;
 
 public class Server_test {
     public static void main (String[] args){
@@ -36,14 +34,15 @@ public class Server_test {
                 int numClient = (int)ois.readObject();
                 if (numClient == -1){
                     oos.writeObject(true);
-                    System.out.println("Client 1 a terminé ses tests.");
+                    System.out.println("Client 1 a terminé ses tests");
                     testLanceeClient1 = true;
                 } else if(numClient == -2){
+                    System.out.println("Client 2 attent que Client 1 ait fini");
                     oos.writeObject(testLanceeClient1);
                     Client2RecuFinTest = testLanceeClient1;
                 } else if(numClient == -10){                    
                     oos.writeObject(true);                    
-                    System.out.println("Client 1 réalise le test 10, en attente de client 2.");
+                    System.out.println("Client 1 réalise le test 10, en attente de client 2");
                     test10LanceeClient1 = true;
                 } else if (numClient == -20){
                     oos.writeObject(test10LanceeClient1);
@@ -53,12 +52,13 @@ public class Server_test {
                     if (numClient == 1){
                         client1Pret = true;
                         renvoie = client2Pret;
+                        System.out.println("Veuillez préparer le Client 2");
                     } else {
                         client2Pret = true;
                         renvoie = client1Pret;
+                        System.out.println("Veuillez préparer le Client 1");
                     }
                     oos.writeObject(renvoie);
-                    System.out.println(renvoie+" envoyé au client " + numClient);
     
                 }
                 

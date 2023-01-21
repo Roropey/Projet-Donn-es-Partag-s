@@ -1,4 +1,7 @@
-public interface Sentence_test_itf extends SharedObject_itf {
-public void write (String a0);
-public String read ();
+public interface Sentence_test_itf {
+	@Write
+	public void write(String text);
+    @Read
+	public String read();
+	
 }

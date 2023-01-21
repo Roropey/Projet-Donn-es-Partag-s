@@ -9,6 +9,7 @@ public class Test_creation_stub {
         String className = test.getClass().getName();
 
         try{
+            /*
             System.out.println("    Suppression ancienne classe déjà créée :");
             String[] commandeSupprJavaItf = new String[] {"rm",className+"_itf.java"};
             Process processEnCours = Runtime.getRuntime().exec(commandeSupprJavaItf);
@@ -20,9 +21,9 @@ public class Test_creation_stub {
             processEnCours.waitFor();            
             System.out.println("fichier interface class supprimée");
             
-
+             */
             String[] commandeSupprJavaStub = new String[] {"rm",className+"_stub.java"};
-            processEnCours = Runtime.getRuntime().exec(commandeSupprJavaStub);
+            Process processEnCours = Runtime.getRuntime().exec(commandeSupprJavaStub);
             processEnCours.waitFor();
             System.out.println("fichier stub java supprimée");
             

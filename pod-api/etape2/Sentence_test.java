@@ -3,12 +3,20 @@ public class Sentence_test {
 	public Sentence_test() {
 		data = new String("");
 	}
-	@Write
 	public void write(String text) {
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		data = text;
 	}
-	@Read
 	public String read() {
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		return data;	
 	}
 	

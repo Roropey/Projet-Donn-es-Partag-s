@@ -221,7 +221,7 @@ public class Client_test_etats extends Thread {
         }       
         System.out.println("Les deux clients sont initialisés");
         if (numClient == 1){
-            System.out.println("\n----Lancement test Client 1");
+            System.out.println("----Lancement test Client 1");
             for (int test = 0; test<10; test++){                
                 System.out.println("Test "+Integer.toString(test+1)+"...");
                 if (test<=5){
@@ -229,11 +229,12 @@ public class Client_test_etats extends Thread {
                 } else if (test<=8) {
                     listSharedObject[test].lock_write(); 
                 } else {
-                    try {            
+                    try {
                         Thread attenteAutreClient = new Client_test_etats(-10);
                         final Thread test10 = new Thread(new test10());
-                        test10.start();
+                        test10.start();                        
                         attenteAutreClient.start();
+                        System.out.println("Attente unlock de la part du Client 2");
                         attenteAutreClient.join();
                         test10.join();
                     } catch (Exception e) {

@@ -15,4 +15,5 @@ public class Sentence_stub extends SharedObject implements Sentence_itf, java.io
         this.unlock();
         return r;
     }
+
 }
