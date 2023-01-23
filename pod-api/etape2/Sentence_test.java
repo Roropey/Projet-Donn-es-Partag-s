@@ -1,4 +1,4 @@
-public class Sentence_test {
+public class Sentence_test implements java.io.Serializable {
 	String 		data;
 	public Sentence_test() {
 		data = new String("");

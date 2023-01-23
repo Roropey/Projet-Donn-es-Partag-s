@@ -13,7 +13,7 @@ public class IrcContinuousSlow {
 		Thread[] pool = new Thread[nbClient];
 		for (int i = 0; i<nbClient;i++){
 			System.out.println("Lancement thread Client"+i);
-			Thread t = new IrcForced("Client"+i,Integer.parseInt(args[1]));
+			Thread t = new IrcForcedSlow("Client"+i,Integer.parseInt(args[1]));
 			t.start();
 			pool[i] = t;
 		}

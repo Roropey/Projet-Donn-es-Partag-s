@@ -11,8 +11,7 @@ import java.rmi.registry.*;
 public class Irc_using_sentence_user extends Frame {
 	public TextArea		text;
 	public TextField	data;
-	Sentence_itf		sentence;
-	Sentence_user_itf	sentence_user;
+	Sentence_user_itf	sentence;
 	static String		myName;
 
 	public static void main(String argv[]) {
@@ -26,21 +25,14 @@ public class Irc_using_sentence_user extends Frame {
 		// initialize the system
 		Client.init();
 		
-		// look up the IRC object in the name server
-		// if not found, create it, and register it in the name server
-		Sentence_itf s = (Sentence_itf) Client.lookup("IRC");
-		if (s == null) {
-			s = (Sentence_itf)Client.create(new Sentence());
-			Client.register("IRC", s);
-		}
 
-		Sentence_user_itf s_user = (Sentence_user_itf) Client.lookup("IRC using IRC");
-		if (s_user == null) {
-			s_user = (Sentence_user_itf) Client.create(new Sentence_user(((Sentence) ((SharedObject)s).getObj())));
-			Client.register("IRC using IRC", s_user);
+		Sentence_user_itf s = (Sentence_user_itf) Client.lookup("IRC using IRC");
+		if (s == null) {
+			s = (Sentence_user_itf) Client.create(new Sentence_user());
+			Client.register("IRC using IRC", s);
 		}
 		// create the graphical part
-		new Irc_using_sentence_user(s_user);
+		new Irc_using_sentence_user(s);
 	}
 
 	public Irc_using_sentence_user(Sentence_user_itf s) {
@@ -66,7 +58,7 @@ public class Irc_using_sentence_user extends Frame {
 		text.setBackground(Color.black); 
 		show();		
 		
-		sentence_user = s;
+		sentence = s;
 	}
 }
 
@@ -83,14 +75,13 @@ class readListener_user implements ActionListener {
 		//irc.sentence.lock_read();
 		
 		// invoke the method
-		String s = irc.sentence_user.read();
-		int hashCode = irc.sentence_user.sentenceHashCode();
+		String s = irc.sentence.read();
 		
 		// unlock the object
 		//irc.sentence.unlock();
 		
 		// display the read value
-		irc.text.append(s+" "+Integer.toString(hashCode)+"\n");
+		irc.text.append(s+" \n");
 	}
 }
 
@@ -108,7 +99,7 @@ class writeListener_user implements ActionListener {
 		//irc.sentence.lock_write();
 		
 		// invoke the method
-		irc.sentence_user.write(Irc_using_sentence_user.myName+" wrote "+s);
+		irc.sentence.write(Irc_using_sentence_user.myName+" wrote "+s);
 		irc.data.setText("");
 		
 		// unlock the object

@@ -49,7 +49,6 @@ public class SharedObject implements Serializable, SharedObject_itf {
 
 	// invoked by the user program on the client node
 	public void lock_read() {
-		System.out.println("lock_read");
 		
 		Boolean lockRead = false;
 		synchronized (this) {
@@ -82,7 +81,6 @@ public class SharedObject implements Serializable, SharedObject_itf {
 	// invoked by the user program on the client node
 	public void lock_write() {
 		
-		System.out.println("lock_write");
 		Boolean lockWrite = false;
 		synchronized (this) {
 			// tant que l’attribut "attente" est vrai , on attend
@@ -112,8 +110,6 @@ public class SharedObject implements Serializable, SharedObject_itf {
 
 	// invoked by the user program on the client node
 	public synchronized void unlock() {
-		
-		System.out.println("unlock");
 		switch (this.lock_state){
 			case RLT : 
 				this.lock_state = lock.RLC;

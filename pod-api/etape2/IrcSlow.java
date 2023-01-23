@@ -11,13 +11,13 @@ import java.rmi.registry.*;
 public class IrcSlow extends Frame {
 	public TextArea		text;
 	public TextField	data;
-	SharedObject		sentence;
+	Sentence_test_itf		Sentence_test;
 	static String		myName;
 
 	public static void main(String argv[]) {
 		
 		if (argv.length != 1) {
-			System.out.println("java IrcSlow <name>");
+			System.out.println("java Irc <name>");
 			return;
 		}
 		myName = argv[0];
@@ -25,19 +25,18 @@ public class IrcSlow extends Frame {
 		// initialize the system
 		Client.init();
 		
-		// look up the IrcSlow object in the name server
+		// look up the IRC object in the name server
 		// if not found, create it, and register it in the name server
-		SharedObject s = Client.lookup("IrcSlow");
+		Sentence_test_itf s = (Sentence_test_itf)Client.lookup("IRCSlow");
 		if (s == null) {
-			s = Client.create(new Sentence());
-			Client.register("IRC", s);
-			System.out.println("Création objet IrcSlow");
+			s = (Sentence_test_itf)Client.create(new Sentence_test());
+			Client.register("IRCSlow", s);
 		}
 		// create the graphical part
 		new IrcSlow(s);
 	}
 
-	public IrcSlow(SharedObject s) {
+	public IrcSlow(Sentence_test_itf s) {
 	
 		setLayout(new FlowLayout());
 	
@@ -58,9 +57,9 @@ public class IrcSlow extends Frame {
 		
 		setSize(470,300);
 		text.setBackground(Color.black); 
-		show();
+		show();		
 		
-		sentence = s;
+		Sentence_test = s;
 	}
 }
 
@@ -74,19 +73,13 @@ class readListenerSlow implements ActionListener {
 	public void actionPerformed (ActionEvent e) {
 		
 		// lock the object in read mode
-		irc.sentence.lock_read();
-		// Wait 10s
-		try{
-			Thread.sleep(10000);
-		} catch (Exception exc) {
-			exc.printStackTrace();
-		}
+		//irc.Sentence_test.lock_read();
 		
 		// invoke the method
-		String s = ((Sentence)(irc.sentence.obj)).read();
+		String s = irc.Sentence_test.read();
 		
 		// unlock the object
-		irc.sentence.unlock();
+		//irc.Sentence_test.unlock();
 		
 		// display the read value
 		irc.text.append(s+"\n");
@@ -104,21 +97,14 @@ class writeListenerSlow implements ActionListener {
         	String s = irc.data.getText();
         	
         	// lock the object in write mode
-		irc.sentence.lock_write();
-		
+		//irc.Sentence_test.lock_write();
 		
 		// invoke the method
-		((Sentence)(irc.sentence.obj)).write(Irc.myName+" wrote "+s);
-		// Wait 10s
-		try{
-			Thread.sleep(10000);
-		} catch (Exception exc) {
-			exc.printStackTrace();
-		}
+		irc.Sentence_test.write(Irc.myName+" wrote "+s);
 		irc.data.setText("");
 		
 		// unlock the object
-		irc.sentence.unlock();
+		//irc.Sentence_test.unlock();
 	}
 }
 

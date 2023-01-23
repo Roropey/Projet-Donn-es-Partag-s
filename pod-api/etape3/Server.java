@@ -34,6 +34,7 @@ public class Server extends UnicastRemoteObject implements Server_itf {
 		} catch (Exception e){
 			e.printStackTrace();
 		}
+		RoleJVM.setServer(true);
 	}
 	
 	// lookup in the name server

@@ -40,7 +40,14 @@ public class Fonctions_generateur_stub {
         try{
             Class<?> classObj= objet.getClass();
             String className = classObj.getName();
-            Class<?> classeItf = Class.forName(className+"_itf");
+            Class<?> classeItf = null;
+            try {
+                classeItf = Class.forName(className+"_itf");
+            } catch (Exception e){
+                System.out.println("L'interface de l'objet "+className+" n'est pas défini. Le programme ne peut pas fonctionner selon les critères attendus.");
+                e.printStackTrace();
+                return null;
+            }
             File classFileStub = new File(className+"_stub.java");
             //File classFileItf = new File(className+"_itf.java");
             if (classFileStub.createNewFile()) {
@@ -106,66 +113,7 @@ public class Fonctions_generateur_stub {
             } else {
                 System.out.println("Internal Error : "+className+"_stub.java already exists.");
             }
-            /*
-            if (classFileItf.createNewFile()) {
-                
-                System.out.println("Début écriture "+className+"_itf.java");
-                FileWriter classFileWriteItf = new FileWriter(classFileItf);
-                //writing start class
-                classFileWriteItf.write("public interface "+className+"_itf extends SharedObject_itf {\n");
-                
-                Method[] methodes = classeItf.getMethods();
-                for (Method methode : methodes){
-                    if (classeItf.equals(methode.getDeclaringClass())) {
-                    
-                        String typeReturn = methode.getReturnType().getName();
-                        if (typeReturn.equals("java.lang.Class")){
-                            typeReturn="Class<?>";
-                        } else if (typeReturn.equals("java.lang.String")){
-                            typeReturn="String";
-                        } else if (typeReturn.equals("java.lang.Object")){
-                            typeReturn="Object";
-                        }
-                        String nameMethode = methode.getName();
-                        System.out.println("Ecriture dans itf méthode : "+nameMethode);
-                        Class<?>[] paramTypes = methode.getParameterTypes();
-                        int nbParam = methode.getParameterCount();
-                        String paramEtTypesString = "";
-                        
-                        for (int i = 0;i<nbParam;i++){
-                            String typeParam = paramTypes[i].getName();
-                            if (typeParam.equals("java.lang.Class")){
-                                typeParam="Class<?>";
-                            } else if (typeParam.equals("java.lang.String")){
-                                typeParam="String";
-                            } else if (typeParam.equals("java.lang.Object")){
-                                typeParam="Object";
-                            }
-                            paramEtTypesString+=typeParam+" a"+Integer.toString(i);
-                            if (i<nbParam - 1){
-                                paramEtTypesString+=",";
-                            }
-                        
-                        }
-                        classFileWriteItf.write("public "+typeReturn+" "+nameMethode+" ("+paramEtTypesString+");\n");
-                        }
-                }
-                classFileWriteItf.write("}");
-        
-                classFileWriteItf.close();
-                System.out.println("Fin écriture "+className+"_itf.java");
-            } else {
-                System.out.println(className+"_itf.java already exists.");
-            }            
-            */System.out.println("Compilation...");/*
-            try {
-                String[] commandeItf = new String[] {"javac",className+"_itf.java"};
-                Process processEnCours = Runtime.getRuntime().exec(commandeItf);
-                processEnCours.waitFor();
-            } catch (Exception e){
-                System.out.println("Compilation de "+className+"_itf.java a échoué.");
-			    e.printStackTrace();
-            } */
+            System.out.println("Compilation...");
             try {
                 String[] commandeStub = new String[] {"javac",className+"_stub.java"};
                 Process processEnCours = Runtime.getRuntime().exec(commandeStub);

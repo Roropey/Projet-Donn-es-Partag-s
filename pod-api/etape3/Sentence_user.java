@@ -1,24 +1,20 @@
 public class Sentence_user implements java.io.Serializable{
 
-    SharedObject sentence;
-
+    Sentence_user sentence;
+    String 		data;
     public Sentence_user() {
+        data = new String("");
         
     }
-
-    @Write
     public void write(String text) {
-		this.sentenceUsed.write(text);
+		data = text;
 	}
-    @Read
 	public String read() {
-		return this.sentenceUsed.read();	
+		return data;	
 	}
-    @Write
-    public int sentenceHashCode(){
-        return this.sentenceUsed.hashCode();
+    public Sentence_user sentence_used(){
+        return this.sentence;
     }
-    
     
     
 }
